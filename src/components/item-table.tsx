@@ -19,7 +19,8 @@ export function ItemTable({ items }: ItemTableProps) {
   )
 
   const hasCallDetails = items.some((item) => item.target_animals != null)
-  const colSpan = hasCallDetails ? 4 : 3
+  const hasItemType = items.some((item) => item.item_type != null)
+  const colSpan = 3 + (hasCallDetails ? 1 : 0) + (hasItemType ? 1 : 0)
 
   return (
     <div className="space-y-4">
@@ -41,6 +42,9 @@ export function ItemTable({ items }: ItemTableProps) {
           <thead>
             <tr className="border-b border-border text-left">
               <th className="py-3 px-4 font-medium text-muted-foreground">名前</th>
+              {hasItemType && (
+                <th className="py-3 px-4 font-medium text-muted-foreground">種別</th>
+              )}
               {hasCallDetails && (
                 <th className="py-3 px-4 font-medium text-muted-foreground">効果対象</th>
               )}
@@ -59,6 +63,11 @@ export function ItemTable({ items }: ItemTableProps) {
               filtered.map((item) => (
                 <tr key={item.id} className="border-b border-border hover:bg-secondary/30">
                   <td className="py-3 px-4 text-foreground font-medium whitespace-nowrap">{item.name}</td>
+                  {hasItemType && (
+                    <td className="py-3 px-4 text-muted-foreground text-sm whitespace-nowrap">
+                      {item.item_type ?? "-"}
+                    </td>
+                  )}
                   {hasCallDetails && (
                     <td className="py-3 px-4 text-primary text-xs">
                       {item.target_animals ?? "-"}
@@ -89,6 +98,9 @@ export function ItemTable({ items }: ItemTableProps) {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-foreground">{item.name}</h3>
+                  {item.item_type && (
+                    <p className="text-xs text-muted-foreground mt-1">{item.item_type}</p>
+                  )}
                   {item.target_animals && (
                     <p className="text-xs text-primary mt-1">
                       対象: {item.target_animals}

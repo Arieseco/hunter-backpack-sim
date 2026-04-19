@@ -281,13 +281,13 @@ INSERT INTO items (name, category, weight, weight_bonus, description) VALUES
 ('ニオイ消しパウダー', 'scent', 0.20, 0, '体から出る臭いをより長時間中和するパウダー。');
 
 -- Equipment (装備)
-INSERT INTO items (name, category, weight, weight_bonus, description) VALUES
-('双眼鏡', 'equipment', 0.50, 0, '遠距離の動物を観察するための双眼鏡。'),
-('距離計付き双眼鏡', 'equipment', 0.70, 0, '距離計を内蔵した高機能双眼鏡。'),
-('デコイ', 'equipment', 1.00, 0, '動物の注意を引きつけるおとり。'),
-('カメラ', 'equipment', 0.50, 0, '野生動物を撮影するためのフィールドカメラ。'),
-('フラッシュライト', 'equipment', 0.30, 0, '暗所での視認性を向上させるライト。'),
-('ナイフ', 'equipment', 0.30, 0, '獲物の解体に使用するフィールドナイフ。');
+-- Columns: name, category, weight, weight_bonus, description, item_type, price, unlock_level
+INSERT INTO items (name, category, weight, weight_bonus, description, item_type, price, unlock_level) VALUES
+('ヴァンテージ 8X42',       'equipment', 1.0, 0, NULL, '双眼鏡', 0,     0),
+('ベンチャー 5x30 測距儀',  'equipment', 1.0, 0, NULL, '双眼鏡', 12000, 11),
+('エイペックスビュー 7X42', 'equipment', 1.0, 0, NULL, '双眼鏡', 24000, 29),
+('救命キット',              'equipment', 0.5, 0, NULL, 'その他', 1500,  9),
+('消臭剤',                  'equipment', 0.5, 0, NULL, 'その他', 3000,  0);
 
 -- Structures (構造物)
 INSERT INTO items (name, category, weight, weight_bonus, description) VALUES

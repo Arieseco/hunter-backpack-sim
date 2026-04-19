@@ -40,6 +40,8 @@ export interface Item {
   effective_distance: number | null
   attraction: number | null
   effective_duration: number | null
+  // equipment / shared fields
+  item_type: string | null
   price: number | null
   unlock_level: number | null
 }
