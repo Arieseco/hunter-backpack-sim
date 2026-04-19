@@ -35,6 +35,13 @@ export interface Item {
   weight_bonus: number
   description: string | null
   image_url: string | null
+  // call-specific fields
+  target_animals: string | null
+  effective_distance: number | null
+  attraction: number | null
+  effective_duration: number | null
+  price: number | null
+  unlock_level: number | null
 }
 
 export interface HuntingArea {
