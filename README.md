@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TheHunter: Call of the Wild バックパックシミュレーター
 
-## Getting Started
+「The Hunter: Call of the Wild」の携行装備重量をシミュレーションするWebアプリ。
+銃器・弾薬・アイテム情報の参照、重量計算、URLによるシミュレーション共有が可能。
 
-First, run the development server:
+## 主な機能
+
+- **重量シミュレーター**: 銃器・弾薬・アイテムをドラッグ&ドロップで装備し、合計重量をリアルタイム計算
+- **銃器データベース**: ライフル・ショットガン・ハンドガン・弓の一覧と対応弾薬
+- **アイテムデータベース**: 呼び笛・匂いアイテム・装備・構造物の一覧
+- **シミュレーション共有**: 装備構成をURLで保存・共有（ログイン不要）
+
+## 技術スタック
+
+| 役割 | 技術 |
+|---|---|
+| フレームワーク | Next.js 16 (App Router) |
+| 言語 | TypeScript |
+| スタイリング | Tailwind CSS + shadcn/ui (Radix UI) |
+| ドラッグ&ドロップ | @dnd-kit/core |
+| データベース | Supabase (PostgreSQL) |
+
+## セットアップ
+
+詳細は [SETUP.md](./SETUP.md) を参照。
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`http://localhost:3000` でアクセス。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ディレクトリ構成
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── layout.tsx                # ルートレイアウト
+│   ├── page.tsx                  # トップページ
+│   ├── firearms/                 # 銃器一覧・詳細
+│   ├── items/                    # アイテム一覧（呼び笛/匂い/装備/構造物）
+│   └── simulator/                # 重量シミュレータ・保存済み閲覧
+├── components/
+│   ├── navigation.tsx            # グローバルナビゲーション
+│   ├── firearm-table.tsx         # 銃器一覧テーブル
+│   ├── firearm-detail.tsx        # 銃器詳細
+│   ├── item-table.tsx            # アイテム一覧テーブル
+│   └── ui/                       # shadcn/ui コンポーネント
+└── lib/
+    ├── supabase.ts               # Supabase クライアント
+    ├── database.types.ts         # DB 型定義
+    ├── firearms.ts               # 銃器データ取得ユーティリティ
+    └── weight.ts                 # 重量計算ロジック
+supabase/
+├── schema.sql                    # テーブル定義
+├── migrations/                   # スキーマ追加マイグレーション
+├── seed.sql                      # 初期データ
+└── rls.sql                       # Row Level Security ポリシー
+docs/
+├── requirements.md               # 要件定義書
+├── basic-design.md               # 基本設計書
+└── detailed-design/              # 詳細設計書（画面別）
+```
 
-## Learn More
+## データソース
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ゲームデータは以下 wiki を参照:  
+https://w.atwiki.jp/thehunter_cotw/
