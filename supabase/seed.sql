@@ -332,96 +332,311 @@ INSERT INTO hunting_areas (name, description) VALUES
 -- =====================================================
 
 INSERT INTO animals (name, level_min, level_max) VALUES
-('ウサギ（Rabbit）', 1, 1),
-('キツネ（Fox）', 1, 2),
-('コヨーテ（Coyote）', 2, 3),
-('アライグマ（Raccoon）', 1, 2),
-('七面鳥（Wild Turkey）', 1, 2),
-('カモ（Mallard Duck）', 1, 2),
-('カナダガン（Canada Goose）', 1, 2),
-('ブラックテール鹿（Blacktail Deer）', 3, 4),
-('ホワイトテール鹿（Whitetail Deer）', 3, 4),
-('ムース（Moose）', 7, 8),
-('エルク（Roosevelt Elk）', 5, 6),
-('ブラックベア（Black Bear）', 6, 8),
-('グリズリーベア（Grizzly Bear）', 7, 9),
-('バイソン（Bison）', 8, 9),
-('マウンテンライオン（Mountain Lion）', 5, 6),
-('プロングホーン（Pronghorn）', 3, 5),
-('マウンテンゴート（Mountain Goat）', 4, 5),
-('ビッグホーンシープ（Bighorn Sheep）', 5, 6),
-('ワピチ（Elk）', 6, 7),
-('ヘラジカ（Eurasian Elk）', 7, 8),
-('アカシカ（Red Deer）', 5, 6),
-('ノロジカ（Roe Deer）', 2, 4),
-('イノシシ（Wild Boar）', 4, 6),
-('ウシシカ（Fallow Deer）', 4, 5),
-('ダマジカ（Fallow Deer）', 4, 5),
-('ライオン（Lion）', 8, 9),
-('ヒョウ（Leopard）', 7, 8),
-('カフィルバッファロー（Cape Buffalo）', 8, 9),
-('インパラ（Impala）', 2, 4),
-('ヌー（Blue Wildebeest）', 6, 7),
-('スプリングボック（Springbok）', 3, 4),
-('シマウマ（Zebra）', 5, 6),
-('クーズー（Greater Kudu）', 6, 7),
-('スプリングボック（Springbok）', 2, 3),
-('オジロジカ（Whitetail Deer）', 3, 4),
-('ウォーターバック（Waterbuck）', 5, 6);
+-- Level 1
+('アナウサギ', 1, 1),
+('カナダガン', 1, 1),
+('コウライキジ', 1, 1),
+('オジロジャックウサギ', 1, 1),
+('マガモ', 1, 1),
+('メリアム・シチメンチョウ', 1, 1),
+('ヨーロッパオオライチョウ', 1, 1),
+('スクラブノウサギ', 1, 1),
+('ヒドリガモ', 1, 1),
+('アカシマアジ', 1, 1),
+('シノリガモ', 1, 1),
+('ヤブノウサギ', 1, 1),
+('リオ・グランデ・シチメンチョウ', 1, 1),
+('アンテロープジャックウサギ', 1, 1),
+('イースタン・ワイルド・ターキー', 1, 1),
+('アメリカコガモ', 1, 1),
+('コリンウズラ', 1, 1),
+('トウブワタオウサギ', 1, 1),
+('イワライチョウ', 1, 1),
+('エゾライチョウ', 1, 1),
+('カラフトライチョウ', 1, 1),
+('キンクロハジロ', 1, 1),
+('クロライチョウ', 1, 1),
+('コガモ', 1, 1),
+('ツンドラヒシクイ', 1, 1),
+('ハイイロガン', 1, 1),
+('ホオジロガモ', 1, 1),
+('ユキウサギ', 1, 1),
+('カササギガン', 1, 1),
+('オーストラリアウズラ', 1, 1),
+('チベットノウサギ', 1, 1),
+('メジロガモ', 1, 1),
+('オカヨシガモ', 1, 1),
+('アオライチョウ', 1, 1),
+('アメリカオシドリ', 1, 1),
+('オナガガモ', 1, 1),
+('ハクガン', 1, 1),
+('ヤマシギ', 1, 1),
+('アカライチョウ', 1, 1),
+('アメリカミンク', 1, 1),
+('テン', 1, 1),
+-- Level 2
+('アカギツネ', 2, 2),
+('コヨーテ', 2, 2),
+('シベリアジャコウジカ', 2, 2),
+('ヨコスジジャッカル', 2, 2),
+('タヌキ', 2, 2),
+('ハイイロギツネ', 2, 2),
+('メキシカンボブキャット', 2, 2),
+('アライグマ', 2, 2),
+('ボブキャット', 2, 2),
+('インドキョン', 2, 2),
+('チベットスナギツネ', 2, 2),
+('アメリカビーバー', 2, 2),
+('ヨーロッパアナグマ', 2, 2),
+-- Level 3
+('ノロジカ', 3, 3),
+('オオヤマネコ', 3, 3),
+('スプリングボック', 3, 3),
+('ブラックバック', 3, 3),
+('アクシスジカ', 3, 3),
+('クビワペッカリー', 3, 3),
+('プロングホーン', 3, 3),
+('野生ヤギ', 3, 3),
+('シャモア', 3, 3),
+('ホッグジカ', 3, 3),
+-- Level 4
+('ダマジカ', 4, 4),
+('オジロジカ', 4, 4),
+('オグロジカ', 4, 4),
+('レッサークーズー', 4, 4),
+('イボイノシシ', 4, 4),
+('シロイワヤギ', 4, 4),
+('ヒマラヤタール', 4, 4),
+('ニホンジカ', 4, 4),
+('イベリアムフロン', 4, 4),
+('グレドスアイベックス', 4, 4),
+('サウスイースタンスパニッシュアイベックス', 4, 4),
+('ベセイテアイベックス', 4, 4),
+('ロンダアイベックス', 4, 4),
+('オオカンガルー', 4, 4),
+('バーラル', 4, 4),
+('ユキヒョウ', 4, 4),
+-- Level 5
+('イノシシ', 5, 5),
+('ピューマ', 5, 5),
+('ミュールジカ', 5, 5),
+('ロッキーマウンテン・ビッグホーン', 5, 5),
+('野生ブタ', 5, 5),
+('デザート・ビッグホーン', 5, 5),
+('ルサジカ', 5, 5),
+-- Level 6
+('アカシカ', 6, 6),
+('ハイイロオオカミ', 6, 6),
+('山のトナカイ', 6, 6),
+('オグロヌー', 6, 6),
+('オリックス', 6, 6),
+('グラントカリブー', 6, 6),
+('イベリアオオカミ', 6, 6),
+('ニルガイ', 6, 6),
+('バラシンガジカ', 6, 6),
+('ウッドランドカリブー', 6, 6),
+-- Level 7
+('アメリカグマ', 7, 7),
+('アメリカアカシカ', 7, 7),
+('ヒグマ', 7, 7),
+('ロッキーマウンテンエルク', 7, 7),
+('アメリカアリゲーター', 7, 7),
+('サンバー', 7, 7),
+('マニトバヘラジカ', 7, 7),
+-- Level 8
+('ヘラジカ', 8, 8),
+('グリズリー', 8, 8),
+('イリエワニ', 8, 8),
+-- Level 9
+('ヨーロッパバイソン', 9, 9),
+('ライオン', 9, 9),
+('アフリカスイギュウ', 9, 9),
+('スイギュウ', 9, 9),
+('ヘイゲンバイソン', 9, 9),
+('バンテン', 9, 9),
+('ベンガルトラ', 9, 9),
+('ノヤク', 9, 9),
+('アメリカバイソン', 9, 9);
 
 -- =====================================================
 -- AREA-ANIMAL RELATIONSHIPS
 -- =====================================================
 
--- レイトン湖水地方 (North American species)
-INSERT INTO area_animals (area_id, animal_id)
-SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name = 'レイトン湖水地方'
-AND a.name IN (
-  'ウサギ（Rabbit）', 'コヨーテ（Coyote）', '七面鳥（Wild Turkey）',
-  'カモ（Mallard Duck）', 'カナダガン（Canada Goose）',
-  'ブラックテール鹿（Blacktail Deer）', 'ホワイトテール鹿（Whitetail Deer）',
-  'ムース（Moose）', 'エルク（Roosevelt Elk）', 'ブラックベア（Black Bear）',
-  'グリズリーベア（Grizzly Bear）'
-);
-
--- メドヴェド＝タイガ国立公園 (Russian/Siberian species)
-INSERT INTO area_animals (area_id, animal_id)
-SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name = 'メドヴェド＝タイガ国立公園'
-AND a.name IN (
-  'ウサギ（Rabbit）', 'キツネ（Fox）', 'アライグマ（Raccoon）',
-  'ヘラジカ（Eurasian Elk）', 'ブラックベア（Black Bear）',
-  'グリズリーベア（Grizzly Bear）', 'ワピチ（Elk）'
-);
-
--- ヒルシュフェルデン保護区 (European species)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
 WHERE ha.name = 'ヒルシュフェルデン保護区'
 AND a.name IN (
-  'ウサギ（Rabbit）', 'キツネ（Fox）', 'カモ（Mallard Duck）',
-  'アカシカ（Red Deer）', 'ノロジカ（Roe Deer）', 'イノシシ（Wild Boar）',
-  'ウシシカ（Fallow Deer）'
+  'アナウサギ', 'カナダガン', 'コウライキジ',
+  'アカギツネ', 'ノロジカ', 'ダマジカ',
+  'イノシシ', 'アカシカ', 'ヨーロッパバイソン'
 );
 
--- ヴルホンガ・サバンナ (African species)
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'レイトン湖水地方'
+AND a.name IN (
+  'オジロジャックウサギ', 'マガモ', 'メリアム・シチメンチョウ',
+  'コヨーテ', 'オジロジカ', 'オグロジカ',
+  'アメリカグマ', 'アメリカアカシカ', 'ヘラジカ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'メドヴェド＝タイガ国立公園'
+AND a.name IN (
+  'ヨーロッパオオライチョウ', 'シベリアジャコウジカ', 'オオヤマネコ',
+  'イノシシ', 'ハイイロオオカミ', '山のトナカイ',
+  'ヒグマ', 'ヘラジカ'
+);
+
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
 WHERE ha.name = 'ヴルホンガ・サバンナ'
 AND a.name IN (
-  'ライオン（Lion）', 'ヒョウ（Leopard）', 'カフィルバッファロー（Cape Buffalo）',
-  'インパラ（Impala）', 'ヌー（Blue Wildebeest）', 'スプリングボック（Springbok）',
-  'シマウマ（Zebra）', 'クーズー（Greater Kudu）', 'ウォーターバック（Waterbuck）'
+  'スクラブノウサギ', 'ヒドリガモ', 'ヨコスジジャッカル',
+  'スプリングボック', 'レッサークーズー', 'イボイノシシ',
+  'オグロヌー', 'オリックス', 'ライオン', 'アフリカスイギュウ'
 );
 
--- シルバーリッジ・ピークス (High altitude North American)
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'パルケ・フェルナンド'
+AND a.name IN (
+  'アカシマアジ', 'ブラックバック', 'アクシスジカ',
+  'クビワペッカリー', 'ピューマ', 'ミュールジカ',
+  'アカシカ', 'スイギュウ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'ユーコンバレー自然保護区'
+AND a.name IN (
+  'カナダガン', 'シノリガモ', 'アカギツネ',
+  'ハイイロオオカミ', 'グラントカリブー',
+  'グリズリー', 'ヘラジカ', 'ヘイゲンバイソン'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'クアトロ・コリナス狩猟保護区'
+AND a.name IN (
+  'コウライキジ', 'ヤブノウサギ', 'ノロジカ',
+  'イベリアムフロン', 'グレドスアイベックス',
+  'サウスイースタンスパニッシュアイベックス', 'ベセイテアイベックス', 'ロンダアイベックス',
+  'イノシシ', 'イベリアオオカミ', 'アカシカ'
+);
+
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
 WHERE ha.name = 'シルバーリッジ・ピークス'
 AND a.name IN (
-  'コヨーテ（Coyote）', 'プロングホーン（Pronghorn）',
-  'マウンテンゴート（Mountain Goat）', 'ビッグホーンシープ（Bighorn Sheep）',
-  'エルク（Roosevelt Elk）', 'ムース（Moose）', 'マウンテンライオン（Mountain Lion）',
-  'グリズリーベア（Grizzly Bear）'
+  'メリアム・シチメンチョウ', 'プロングホーン', 'シロイワヤギ',
+  'ロッキーマウンテン・ビッグホーン', 'ピューマ', 'ミュールジカ',
+  'アメリカグマ', 'ロッキーマウンテンエルク', 'ヘイゲンバイソン'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'テ・アワロア国立公園'
+AND a.name IN (
+  'アナウサギ', 'マガモ', 'メリアム・シチメンチョウ',
+  '野生ヤギ', 'シャモア', 'ヒマラヤタール',
+  'ニホンジカ', 'ダマジカ', '野生ブタ', 'アカシカ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = '渓谷牧場'
+AND a.name IN (
+  'コウライキジ', 'リオ・グランデ・シチメンチョウ', 'アンテロープジャックウサギ',
+  'コヨーテ', 'メキシカンボブキャット', 'プロングホーン',
+  'クビワペッカリー', 'オジロジカ', 'デザート・ビッグホーン', 'ミュールジカ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'ミシシッピ・エーカーズ保護区'
+AND a.name IN (
+  'イースタン・ワイルド・ターキー', 'アメリカコガモ', 'コリンウズラ',
+  'トウブワタオウサギ', 'アライグマ', 'ハイイロギツネ',
+  'オジロジカ', 'イノシシ', 'アメリカグマ', 'アメリカアリゲーター'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'レボントゥリ海岸'
+AND a.name IN (
+  'イワライチョウ', 'エゾライチョウ', 'カラフトライチョウ',
+  'キンクロハジロ', 'クロライチョウ', 'コガモ',
+  'ツンドラヒシクイ', 'ハイイロガン', 'ヒドリガモ',
+  'ホオジロガモ', 'ユキウサギ', 'ヨーロッパオオライチョウ',
+  'カナダガン', 'マガモ', 'タヌキ',
+  'オオヤマネコ', 'オジロジカ', 'ヒグマ', 'ヘラジカ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'ニューイングランド山地'
+AND a.name IN (
+  'アメリカコガモ', 'イースタン・ワイルド・ターキー', 'コウライキジ',
+  'コリンウズラ', 'トウブワタオウサギ', 'ホオジロガモ',
+  'マガモ', 'アカギツネ', 'アライグマ',
+  'コヨーテ', 'ハイイロギツネ', 'ボブキャット',
+  'オジロジカ', 'アメリカグマ', 'ヘラジカ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'エメラルド海岸'
+AND a.name IN (
+  'カササギガン', 'オーストラリアウズラ', 'アカギツネ',
+  '野生ヤギ', 'アクシスジカ', 'ホッグジカ',
+  'オオカンガルー', 'ダマジカ', '野生ブタ',
+  'ルサジカ', 'アカシカ', 'サンバー',
+  'イリエワニ', 'バンテン'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'スンダルパタン保護区'
+AND a.name IN (
+  'ハイイロガン', 'チベットノウサギ', 'インドキョン',
+  'チベットスナギツネ', 'ブラックバック', 'バーラル',
+  'ヒマラヤタール', 'ユキヒョウ', 'ニルガイ',
+  'バラシンガジカ', 'スイギュウ', 'ベンガルトラ', 'ノヤク'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'ザルツヴィーゼン公園'
+AND a.name IN (
+  'コガモ', 'ヒドリガモ', 'ツンドラヒシクイ',
+  'メジロガモ', 'オカヨシガモ', 'キンクロハジロ',
+  'ホオジロガモ', 'マガモ', 'ハイイロガン',
+  'クロライチョウ', 'コウライキジ', 'アナウサギ',
+  'アカギツネ', 'アライグマ', 'タヌキ'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'アスキー・リッジ狩猟保護区'
+AND a.name IN (
+  'アオライチョウ', 'アメリカオシドリ', 'オナガガモ',
+  'カナダガン', 'コウライキジ', 'ハクガン',
+  'マガモ', 'アメリカビーバー', 'プロングホーン',
+  'オジロジカ', 'シロイワヤギ', 'ロッキーマウンテン・ビッグホーン',
+  'ミュールジカ', 'ハイイロオオカミ', 'ウッドランドカリブー',
+  'アメリカグマ', 'マニトバヘラジカ', 'ヘラジカ', 'アメリカバイソン'
+);
+
+INSERT INTO area_animals (area_id, animal_id)
+SELECT ha.id, a.id FROM hunting_areas ha, animals a
+WHERE ha.name = 'トール・ナン・シアン狩猟場'
+AND a.name IN (
+  'コウライキジ', 'ヤマシギ', 'ヒドリガモ',
+  'アカライチョウ', 'クロライチョウ', 'ヨーロッパオオライチョウ',
+  'ユキウサギ', 'アメリカミンク', 'テン',
+  'ヨーロッパアナグマ', 'アカギツネ', '野生ヤギ',
+  'ノロジカ', 'ダマジカ', 'ニホンジカ',
+  'イノシシ', 'アカシカ'
 );
