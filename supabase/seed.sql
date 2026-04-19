@@ -308,14 +308,24 @@ INSERT INTO items (name, category, weight, weight_bonus, description, price, red
 -- =====================================================
 
 INSERT INTO hunting_areas (name, description) VALUES
-('ラバーク岳（Layton Lake District）', 'アメリカ・ワシントン州の山岳地帯。多様な北米の野生動物が生息。'),
-('ミリウス牧場（Medved-Taiga）', 'ロシア・シベリアの広大なタイガ地帯。北方の大型獣が生息。'),
-('ヒルバン草原（Hirschfelden）', 'ドイツの丘陵地帯。ヨーロッパ産の鹿や猪が生息。'),
-('ラゴ・デル・フエゴ（Vurhonga Savanna）', '南アフリカのサバンナ。アフリカの野生動物が生息。'),
-('パース・カントリー（Parque Fernando）', '南アメリカの熱帯雨林。希少な南米動物が生息。'),
-('ルプレヒト農場（Silver Ridge Peaks）', 'アメリカ・コロラド州の高山地帯。高山動物が生息。'),
-('ウィンドサップ（Te Awaroa）', 'ニュージーランドの森林地帯。固有の動物が生息。'),
-('アフリカ草原（Cuatro Colinas）', 'スペインの農村地帯。地中海性の野生動物が生息。');
+('ヒルシュフェルデン保護区', 'ドイツの丘陵地帯。ヨーロッパ産の鹿や猪が生息。'),
+('レイトン湖水地方', 'アメリカ・ワシントン州の山岳・湖水地帯。多様な北米野生動物が生息。'),
+('メドヴェド＝タイガ国立公園', 'ロシア・シベリアの広大なタイガ地帯。北方の大型獣が生息。'),
+('ヴルホンガ・サバンナ', '南アフリカのサバンナ。アフリカの野生動物が生息。'),
+('パルケ・フェルナンド', '南アメリカの熱帯雨林。希少な南米動物が生息。'),
+('ユーコンバレー自然保護区', 'カナダ・ユーコン準州の大自然。北米の大型獣が生息。'),
+('クアトロ・コリナス狩猟保護区', 'スペインの農村地帯。地中海性の野生動物が生息。'),
+('シルバーリッジ・ピークス', 'アメリカ・コロラド州の高山地帯。高山動物が生息。'),
+('テ・アワロア国立公園', 'ニュージーランドの森林地帯。固有の動物が生息。'),
+('渓谷牧場', 'アメリカ南部の牧場地帯。多様な野生動物が生息。'),
+('ミシシッピ・エーカーズ保護区', 'アメリカ・ミシシッピ州の湿地帯。南部固有の動物が生息。'),
+('レボントゥリ海岸', 'フィンランドの海岸地帯。北欧の野鳥や動物が生息。'),
+('ニューイングランド山地', 'アメリカ北東部の山岳地帯。東部固有の動物が生息。'),
+('エメラルド海岸', 'アイルランドの沿岸地帯。ヨーロッパの野生動物が生息。'),
+('スンダルパタン保護区', 'インドの森林保護区。アジアの大型獣が生息。'),
+('ザルツヴィーゼン公園', 'オーストリアの草原地帯。ヨーロッパの野生動物が生息。'),
+('アスキー・リッジ狩猟保護区', 'スコットランドの荒野。ヨーロッパ北部の動物が生息。'),
+('トール・ナン・シアン狩猟場', 'スコットランド高地の狩猟場。固有の野生動物が生息。');
 
 -- =====================================================
 -- ANIMALS
@@ -363,10 +373,10 @@ INSERT INTO animals (name, level_min, level_max) VALUES
 -- AREA-ANIMAL RELATIONSHIPS
 -- =====================================================
 
--- Layton Lake District (North American species)
+-- レイトン湖水地方 (North American species)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name LIKE '%Layton%'
+WHERE ha.name = 'レイトン湖水地方'
 AND a.name IN (
   'ウサギ（Rabbit）', 'コヨーテ（Coyote）', '七面鳥（Wild Turkey）',
   'カモ（Mallard Duck）', 'カナダガン（Canada Goose）',
@@ -375,40 +385,40 @@ AND a.name IN (
   'グリズリーベア（Grizzly Bear）'
 );
 
--- Medved-Taiga (Russian/Siberian species)
+-- メドヴェド＝タイガ国立公園 (Russian/Siberian species)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name LIKE '%Medved%'
+WHERE ha.name = 'メドヴェド＝タイガ国立公園'
 AND a.name IN (
   'ウサギ（Rabbit）', 'キツネ（Fox）', 'アライグマ（Raccoon）',
   'ヘラジカ（Eurasian Elk）', 'ブラックベア（Black Bear）',
   'グリズリーベア（Grizzly Bear）', 'ワピチ（Elk）'
 );
 
--- Hirschfelden (European species)
+-- ヒルシュフェルデン保護区 (European species)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name LIKE '%Hirschfelden%'
+WHERE ha.name = 'ヒルシュフェルデン保護区'
 AND a.name IN (
   'ウサギ（Rabbit）', 'キツネ（Fox）', 'カモ（Mallard Duck）',
   'アカシカ（Red Deer）', 'ノロジカ（Roe Deer）', 'イノシシ（Wild Boar）',
   'ウシシカ（Fallow Deer）'
 );
 
--- Vurhonga Savanna (African species)
+-- ヴルホンガ・サバンナ (African species)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name LIKE '%Vurhonga%'
+WHERE ha.name = 'ヴルホンガ・サバンナ'
 AND a.name IN (
   'ライオン（Lion）', 'ヒョウ（Leopard）', 'カフィルバッファロー（Cape Buffalo）',
   'インパラ（Impala）', 'ヌー（Blue Wildebeest）', 'スプリングボック（Springbok）',
   'シマウマ（Zebra）', 'クーズー（Greater Kudu）', 'ウォーターバック（Waterbuck）'
 );
 
--- Silver Ridge Peaks (High altitude North American)
+-- シルバーリッジ・ピークス (High altitude North American)
 INSERT INTO area_animals (area_id, animal_id)
 SELECT ha.id, a.id FROM hunting_areas ha, animals a
-WHERE ha.name LIKE '%Silver%'
+WHERE ha.name = 'シルバーリッジ・ピークス'
 AND a.name IN (
   'コヨーテ（Coyote）', 'プロングホーン（Pronghorn）',
   'マウンテンゴート（Mountain Goat）', 'ビッグホーンシープ（Bighorn Sheep）',
