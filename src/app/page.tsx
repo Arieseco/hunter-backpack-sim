@@ -1,65 +1,110 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Crosshair, Package, Weight, ChevronRight } from "lucide-react";
 
-export default function Home() {
+const sections = [
+  {
+    href: "/simulator",
+    icon: Weight,
+    title: "重量シミュレータ",
+    description: "携行アイテムを選択し、重量をシミュレーション。バックパックやスキルも考慮した最適な装備を計画できます。",
+    highlight: true,
+  },
+  {
+    href: "/firearms",
+    icon: Crosshair,
+    title: "銃器一覧",
+    description: "ライフル、ショットガン、ハンドガン、弓の一覧と対応弾薬。重量・適正クラスを確認できます。",
+    children: [
+      { href: "/firearms/rifles", label: "ライフル" },
+      { href: "/firearms/shotguns", label: "ショットガン" },
+      { href: "/firearms/handguns", label: "ハンドガン" },
+      { href: "/firearms/bows", label: "弓" },
+    ],
+  },
+  {
+    href: "/items",
+    icon: Package,
+    title: "アイテム一覧",
+    description: "呼び笛、匂いアイテム、装備、構造物など銃器以外のアイテム一覧。",
+    children: [
+      { href: "/items/calls", label: "呼び笛" },
+      { href: "/items/scents", label: "匂いアイテム" },
+      { href: "/items/equipment", label: "装備" },
+      { href: "/items/structures", label: "構造物" },
+    ],
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <div className="flex justify-center mb-4">
+          <Crosshair className="w-12 h-12 text-amber-400" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <h1 className="text-3xl font-bold text-white mb-3">
+          TheHunter: CoTW<br />
+          <span className="text-amber-400">バックパックシミュレーター</span>
+        </h1>
+        <p className="text-stone-400 max-w-lg mx-auto">
+          The Hunter: Call of the Wild の装備重量をシミュレート。銃器・アイテム情報の確認、最適な携行装備の計画にご活用ください。
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        {sections.map((section) => {
+          const Icon = section.icon;
+          return (
+            <div
+              key={section.href}
+              className={`rounded-xl border p-6 ${
+                section.highlight
+                  ? "border-amber-600 bg-amber-950/30"
+                  : "border-stone-700 bg-stone-900"
+              }`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-6 h-6 ${section.highlight ? "text-amber-400" : "text-stone-400"}`} />
+                  <h2 className="text-lg font-semibold text-white">{section.title}</h2>
+                </div>
+                <Link
+                  href={section.href}
+                  className={`flex items-center gap-1 text-sm transition-colors ${
+                    section.highlight
+                      ? "text-amber-400 hover:text-amber-300"
+                      : "text-stone-400 hover:text-stone-200"
+                  }`}
+                >
+                  開く <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <p className="text-stone-400 text-sm mb-4">{section.description}</p>
+              {section.children && (
+                <div className="flex flex-wrap gap-2">
+                  {section.children.map((child) => (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      className="px-3 py-1 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded text-sm transition-colors"
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-10 p-4 bg-stone-900 border border-stone-700 rounded-lg text-sm text-stone-500">
+        <p>
+          データ出典:{" "}
+          <span className="text-stone-400">The Hunter: Call of the Wild Wiki</span>。
+          ゲームアップデートにより実際の数値と異なる場合があります。
+        </p>
+      </div>
     </div>
   );
 }
