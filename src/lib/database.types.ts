@@ -35,6 +35,20 @@ export interface Item {
   weight_bonus: number
   description: string | null
   image_url: string | null
+  // call-specific fields
+  target_animals: string | null
+  effective_distance: number | null
+  attraction: number | null
+  effective_duration: number | null
+  // equipment / shared fields
+  item_type: string | null
+  price: number | null
+  unlock_level: number | null
+  // structure-specific fields
+  reduces_hunting_pressure: boolean | null
+  concealment_rate: number | null
+  max_installations: number | null
+  disturbance_radius: number | null
 }
 
 export interface HuntingArea {
