@@ -1,10 +1,11 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronDown, Crosshair } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import Link from "next/link"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
+import { useState, useRef, useEffect } from "react"
+import { ChevronDown, Menu, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: "/", label: "トップ" },
@@ -29,83 +30,230 @@ const navItems = [
     ],
   },
   { href: "/simulator", label: "重量シミュレータ" },
-];
+]
 
 export function Navigation() {
-  const pathname = usePathname();
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const pathname = usePathname()
+  const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/")
+
+  const handleMouseEnter = (href: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setOpenMenu(href)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenMenu(null)
+    }, 150)
+  }
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setMobileSubmenu(null)
+  }, [pathname])
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
-    <nav className="bg-stone-900 border-b border-stone-700 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 flex items-center h-14 gap-6">
-        <Link href="/" className="flex items-center gap-2 text-amber-400 font-bold shrink-0">
-          <Crosshair className="w-5 h-5" />
-          <span className="hidden sm:block text-sm">TheHunter Simulator</span>
-        </Link>
+    <>
+      {/* Desktop Header */}
+      <nav className="hidden md:block bg-card border-b border-border sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-primary font-semibold shrink-0"
+          >
+            <Image 
+              src="/favicon.png" 
+              alt="TheHunter Simulator" 
+              width={32} 
+              height={32}
+              className="rounded"
+            />
+            <span>TheHunter Simulator</span>
+          </Link>
 
-        <div className="flex items-center gap-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            if (!item.children) {
+          <div className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href)
+
+              if (item.children) {
+                return (
+                  <div
+                    key={item.href}
+                    className="relative"
+                    onMouseEnter={() => handleMouseEnter(item.href)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <button
+                      onClick={() =>
+                        setOpenMenu(openMenu === item.href ? null : item.href)
+                      }
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        active
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      )}
+                    >
+                      {item.label}
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          openMenu === item.href && "rotate-180"
+                        )}
+                      />
+                    </button>
+
+                    {openMenu === item.href && (
+                      <div
+                        className="absolute top-full left-0 pt-1"
+                        onMouseEnter={() => handleMouseEnter(item.href)}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        <div className="bg-popover border border-border rounded-md shadow-lg py-1 min-w-[140px]">
+                          {item.children.map((child) => {
+                            const childActive = pathname === child.href
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className={cn(
+                                  "block px-4 py-2 text-sm transition-colors",
+                                  childActive
+                                    ? "text-primary bg-secondary"
+                                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                )}
+                              >
+                                {child.label}
+                              </Link>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-3 py-1.5 rounded text-sm transition-colors",
-                    isActive
-                      ? "bg-amber-600 text-white"
-                      : "text-stone-300 hover:text-white hover:bg-stone-800"
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   )}
                 >
                   {item.label}
                 </Link>
-              );
-            }
+              )
+            })}
+          </div>
+        </div>
+      </nav>
 
-            return (
-              <div key={item.href} className="relative">
-                <button
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors",
-                    isActive
-                      ? "bg-amber-600 text-white"
-                      : "text-stone-300 hover:text-white hover:bg-stone-800"
-                  )}
-                  onMouseEnter={() => setOpenMenu(item.href)}
-                  onMouseLeave={() => setOpenMenu(null)}
-                  onClick={() => setOpenMenu(openMenu === item.href ? null : item.href)}
-                >
-                  {item.label}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-                {openMenu === item.href && (
-                  <div
-                    className="absolute top-full left-0 mt-1 bg-stone-800 border border-stone-700 rounded shadow-lg min-w-36 z-50"
-                    onMouseEnter={() => setOpenMenu(item.href)}
-                    onMouseLeave={() => setOpenMenu(null)}
-                  >
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
+      {/* Mobile Hamburger Button */}
+      <button
+        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-card border border-border text-foreground shadow-lg"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label={mobileMenuOpen ? "メニューを閉じる" : "メニューを開く"}
+      >
+        {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-sm">
+          <div className="pt-16 px-4">
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const active = isActive(item.href)
+
+                if (item.children) {
+                  const isSubmenuOpen = mobileSubmenu === item.href
+                  return (
+                    <div key={item.href}>
+                      <button
+                        onClick={() =>
+                          setMobileSubmenu(isSubmenuOpen ? null : item.href)
+                        }
                         className={cn(
-                          "block px-4 py-2 text-sm transition-colors",
-                          pathname === child.href
-                            ? "text-amber-400 bg-stone-700"
-                            : "text-stone-300 hover:text-white hover:bg-stone-700"
+                          "w-full flex items-center justify-between px-4 py-4 rounded-md text-base font-medium transition-colors",
+                          active
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground hover:bg-secondary"
                         )}
                       >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                        {item.label}
+                        <ChevronDown
+                          className={cn(
+                            "h-5 w-5 transition-transform",
+                            isSubmenuOpen && "rotate-180"
+                          )}
+                        />
+                      </button>
+                      {isSubmenuOpen && (
+                        <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary/30 pl-4">
+                          {item.children.map((child) => {
+                            const childActive = pathname === child.href
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className={cn(
+                                  "block px-4 py-3 rounded-md text-base transition-colors",
+                                  childActive
+                                    ? "text-primary font-medium"
+                                    : "text-muted-foreground hover:text-foreground"
+                                )}
+                              >
+                                {child.label}
+                              </Link>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "block px-4 py-4 rounded-md text-base font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
-  );
+      )}
+    </>
+  )
 }

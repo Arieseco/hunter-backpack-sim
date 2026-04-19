@@ -1,4 +1,7 @@
+// DB型定義 - Supabaseテーブルに対応するTypeScript型
+
 export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow'
+
 export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 
 export interface Firearm {
@@ -69,49 +72,18 @@ export interface Simulation {
   capacity: number
 }
 
-export interface Database {
-  public: {
-    Tables: {
-      firearms: {
-        Row: Firearm
-        Insert: Omit<Firearm, 'id'>
-        Update: Partial<Omit<Firearm, 'id'>>
-      }
-      ammo: {
-        Row: Ammo
-        Insert: Omit<Ammo, 'id'>
-        Update: Partial<Omit<Ammo, 'id'>>
-      }
-      firearm_ammo: {
-        Row: FirearmAmmo
-        Insert: FirearmAmmo
-        Update: Partial<FirearmAmmo>
-      }
-      items: {
-        Row: Item
-        Insert: Omit<Item, 'id'>
-        Update: Partial<Omit<Item, 'id'>>
-      }
-      hunting_areas: {
-        Row: HuntingArea
-        Insert: Omit<HuntingArea, 'id'>
-        Update: Partial<Omit<HuntingArea, 'id'>>
-      }
-      animals: {
-        Row: Animal
-        Insert: Omit<Animal, 'id'>
-        Update: Partial<Omit<Animal, 'id'>>
-      }
-      area_animals: {
-        Row: AreaAnimal
-        Insert: AreaAnimal
-        Update: Partial<AreaAnimal>
-      }
-      simulations: {
-        Row: Simulation
-        Insert: Omit<Simulation, 'id' | 'created_at'>
-        Update: Partial<Omit<Simulation, 'id' | 'created_at'>>
-      }
-    }
-  }
+// ラベル定義
+export const FIREARM_TYPE_LABEL: Record<FirearmType, string> = {
+  rifle: 'ライフル',
+  shotgun: 'ショットガン',
+  handgun: 'ハンドガン',
+  bow: '弓',
+}
+
+export const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {
+  call: '呼び笛',
+  scent: '匂い消し',
+  equipment: '装備品',
+  structure: '構造物',
+  backpack: 'バックパック',
 }

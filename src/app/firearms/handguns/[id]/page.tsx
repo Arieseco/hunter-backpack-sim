@@ -1,37 +1,47 @@
-import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { notFound } from "next/navigation"
+import { supabase } from "@/lib/supabase"
+import { FirearmDetail } from "@/components/firearm-detail"
+import type { Firearm, Ammo } from "@/lib/database.types"
 
-export const dynamic = "force-dynamic";
-import { FirearmDetail } from "@/components/firearm-detail";
-import type { Firearm, Ammo } from "@/lib/database.types";
+export const dynamic = "force-dynamic"
 
-interface Props {
-  params: Promise<{ id: string }>;
+interface PageProps {
+  params: Promise<{ id: string }>
 }
 
-export default async function HandgunDetailPage({ params }: Props) {
-  const { id } = await params;
+export default async function HandgunDetailPage({ params }: PageProps) {
+  const { id } = await params
 
   const [{ data: firearmRaw }, { data: ammoLinks }] = await Promise.all([
     supabase.from("firearms").select("*").eq("id", id).single(),
     supabase.from("firearm_ammo").select("ammo_id").eq("firearm_id", id),
-  ]);
+  ])
 
-  const firearm = firearmRaw as Firearm | null;
-  if (!firearm || firearm.type !== "handgun") notFound();
+  const firearm = firearmRaw as Firearm | null
 
-  const links = ammoLinks as { ammo_id: string }[] | null;
-  const ammoIds = (links ?? []).map((l) => l.ammo_id);
-  const { data: ammoRaw } = ammoIds.length
-    ? await supabase.from("ammo").select("*").in("id", ammoIds).order("name")
-    : { data: [] };
+  if (!firearm || firearm.type !== "handgun") {
+    notFound()
+  }
+
+  const links = ammoLinks as { ammo_id: string }[] | null
+  const ammoIds = links?.map((l) => l.ammo_id) ?? []
+
+  let ammoList: Ammo[] = []
+  if (ammoIds.length > 0) {
+    const { data: ammoRaw } = await supabase
+      .from("ammo")
+      .select("*")
+      .in("id", ammoIds)
+      .order("name")
+    ammoList = (ammoRaw as Ammo[] | null) ?? []
+  }
 
   return (
     <FirearmDetail
       firearm={firearm}
-      ammoList={(ammoRaw as Ammo[] | null) ?? []}
+      ammoList={ammoList}
       backHref="/firearms/handguns"
       backLabel="ハンドガン一覧"
     />
-  );
+  )
 }

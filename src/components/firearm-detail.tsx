@@ -1,77 +1,91 @@
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
-import type { Firearm, Ammo } from "@/lib/database.types";
+import Link from "next/link"
+import { ChevronLeft, Weight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import type { Firearm, Ammo } from "@/lib/database.types"
 
 interface FirearmDetailProps {
-  firearm: Firearm;
-  ammoList: Ammo[];
-  backHref: string;
-  backLabel: string;
+  firearm: Firearm
+  ammoList: Ammo[]
+  backHref: string
+  backLabel: string
 }
 
-export function FirearmDetail({ firearm, ammoList, backHref, backLabel }: FirearmDetailProps) {
+export function FirearmDetail({
+  firearm,
+  ammoList,
+  backHref,
+  backLabel,
+}: FirearmDetailProps) {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="container mx-auto px-4 py-8">
       <Link
         href={backHref}
-        className="inline-flex items-center gap-2 text-stone-400 hover:text-stone-200 text-sm mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ChevronLeft className="h-4 w-4" />
         {backLabel}
       </Link>
 
-      <div className="bg-stone-900 border border-stone-700 rounded-xl p-6 mb-6">
-        <h1 className="text-2xl font-bold text-white mb-4">{firearm.name}</h1>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-xs text-stone-500 mb-1">重量</p>
-            <p className="text-lg font-semibold text-amber-400">{firearm.weight} kg</p>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-2xl">{firearm.name}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 text-lg">
+            <Weight className="h-5 w-5 text-primary" />
+            <span className="font-medium">{firearm.weight.toFixed(2)} kg</span>
           </div>
-        </div>
-        {firearm.description && (
-          <p className="text-stone-400 text-sm leading-relaxed">{firearm.description}</p>
-        )}
-      </div>
+          {firearm.description && (
+            <p className="text-muted-foreground">{firearm.description}</p>
+          )}
+        </CardContent>
+      </Card>
 
-      <div>
-        <h2 className="text-lg font-semibold text-white mb-4">対応弾薬・矢</h2>
-        {ammoList.length === 0 ? (
-          <p className="text-stone-500 text-sm">弾薬情報がありません</p>
-        ) : (
-          <div className="rounded-lg border border-stone-700 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-stone-800 text-stone-400">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">弾薬名</th>
-                  <th className="text-left px-4 py-3 font-medium hidden sm:table-cell">適正クラス</th>
-                  <th className="text-right px-4 py-3 font-medium">重量</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ammoList.map((ammo, i) => (
-                  <tr
-                    key={ammo.id}
-                    className={`border-t border-stone-800 ${i % 2 === 0 ? "bg-stone-900" : "bg-stone-900/50"}`}
-                  >
-                    <td className="px-4 py-3 text-stone-100">{ammo.name}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      {ammo.class_min != null && ammo.class_max != null ? (
-                        <Badge variant="outline" className="border-stone-600 text-stone-300">
-                          クラス {ammo.class_min}–{ammo.class_max}
-                        </Badge>
-                      ) : (
-                        <span className="text-stone-600">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-stone-300">{ammo.weight} kg</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <h2 className="text-xl font-semibold mb-4">対応弾薬・矢</h2>
+
+      {ammoList.length === 0 ? (
+        <p className="text-muted-foreground">弾薬情報がありません</p>
+      ) : (
+        <div className="rounded-lg border border-border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>弾薬名</TableHead>
+                <TableHead className="hidden sm:table-cell">適正クラス</TableHead>
+                <TableHead className="text-right">重量</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ammoList.map((ammo) => (
+                <TableRow key={ammo.id} className="hover:bg-muted/30">
+                  <TableCell className="font-medium">{ammo.name}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {ammo.class_min != null && ammo.class_max != null ? (
+                      <Badge variant="outline">
+                        クラス {ammo.class_min}–{ammo.class_max}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {ammo.weight.toFixed(2)} kg
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
-  );
+  )
 }
