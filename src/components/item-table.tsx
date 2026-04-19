@@ -20,7 +20,8 @@ export function ItemTable({ items }: ItemTableProps) {
 
   const hasCallDetails = items.some((item) => item.target_animals != null)
   const hasItemType = items.some((item) => item.item_type != null)
-  const colSpan = 3 + (hasCallDetails ? 1 : 0) + (hasItemType ? 1 : 0)
+  const hasStructureDetails = items.some((item) => item.concealment_rate != null || item.reduces_hunting_pressure != null)
+  const colSpan = 3 + (hasCallDetails ? 1 : 0) + (hasItemType ? 1 : 0) + (hasStructureDetails ? 3 : 0)
 
   return (
     <div className="space-y-4">
@@ -48,6 +49,13 @@ export function ItemTable({ items }: ItemTableProps) {
               {hasCallDetails && (
                 <th className="py-3 px-4 font-medium text-muted-foreground">効果対象</th>
               )}
+              {hasStructureDetails && (
+                <>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-center">狩猟圧軽減</th>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-right">隠蔽率</th>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-right">設置数</th>
+                </>
+              )}
               <th className="py-3 px-4 font-medium text-muted-foreground">説明</th>
               <th className="py-3 px-4 font-medium text-muted-foreground text-right">重量</th>
             </tr>
@@ -72,6 +80,19 @@ export function ItemTable({ items }: ItemTableProps) {
                     <td className="py-3 px-4 text-primary text-xs">
                       {item.target_animals ?? "-"}
                     </td>
+                  )}
+                  {hasStructureDetails && (
+                    <>
+                      <td className="py-3 px-4 text-center text-foreground">
+                        {item.reduces_hunting_pressure ? "○" : "-"}
+                      </td>
+                      <td className="py-3 px-4 text-right text-foreground tabular-nums">
+                        {item.concealment_rate != null ? `${item.concealment_rate}%` : "-"}
+                      </td>
+                      <td className="py-3 px-4 text-right text-foreground tabular-nums">
+                        {item.max_installations ?? "-"}
+                      </td>
+                    </>
                   )}
                   <td className="py-3 px-4 text-muted-foreground max-w-xs truncate">
                     {item.description ?? "-"}
@@ -104,6 +125,13 @@ export function ItemTable({ items }: ItemTableProps) {
                   {item.target_animals && (
                     <p className="text-xs text-primary mt-1">
                       対象: {item.target_animals}
+                    </p>
+                  )}
+                  {(item.reduces_hunting_pressure || item.concealment_rate != null) && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {item.reduces_hunting_pressure ? "狩猟圧軽減○" : ""}
+                      {item.concealment_rate != null ? `　隠蔽率 ${item.concealment_rate}%` : ""}
+                      {item.max_installations != null ? `　最大${item.max_installations}個` : ""}
                     </p>
                   )}
                   {item.description && (

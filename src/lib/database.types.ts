@@ -44,6 +44,11 @@ export interface Item {
   item_type: string | null
   price: number | null
   unlock_level: number | null
+  // structure-specific fields
+  reduces_hunting_pressure: boolean | null
+  concealment_rate: number | null
+  max_installations: number | null
+  disturbance_radius: number | null
 }
 
 export interface HuntingArea {

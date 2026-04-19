@@ -290,13 +290,18 @@ INSERT INTO items (name, category, weight, weight_bonus, description, item_type,
 ('消臭剤',                  'equipment', 0.5, 0, NULL, 'その他', 3000,  0);
 
 -- Structures (構造物)
-INSERT INTO items (name, category, weight, weight_bonus, description) VALUES
-('テント', 'structure', 3.00, 0, 'フィールドに設置できる携帯テント。昼夜サイクルをスキップ可能。'),
-('三脚', 'structure', 2.00, 0, '銃器を安定させるための三脚。精度が向上する。'),
-('ブラインド', 'structure', 2.50, 0, '動物に見つからないようにするためのカモフラージュシェルター。'),
-('フィーダー', 'structure', 2.00, 0, '動物を引き付けるためのフィーダー（えさ台）。'),
-('ドリンカー', 'structure', 2.00, 0, '動物を引き付けるための水飲み場。'),
-('ツリースタンド', 'structure', 3.00, 0, '木に取り付けて高所から狩猟するためのスタンド。');
+-- Columns: name, category, weight, weight_bonus, description, price, reduces_hunting_pressure, concealment_rate, max_installations, disturbance_radius
+-- Note: Map設置items have no carry weight (0) and no max_installations/disturbance_radius (NULL)
+INSERT INTO items (name, category, weight, weight_bonus, description, price, reduces_hunting_pressure, concealment_rate, max_installations, disturbance_radius) VALUES
+('狩猟スタンド（Map設置）',          'structure', 0, 0, 'マップに事前設置された狩猟スタンド。重量なし。',         2100,  true,  80, NULL, NULL),
+('グラウンド・ブラインド（Map設置）', 'structure', 0, 0, 'マップに事前設置されたグラウンドブラインド。重量なし。', 1700,  true,  80, NULL, NULL),
+('グラウンド・ブラインド',            'structure', 6, 0, '持ち運び可能なグラウンドブラインド。隠蔽率80%。',        8000,  true,  80, 16,   250),
+('ウォーターフォウル・ブラインド',    'structure', 6, 0, '水鳥猟向けブラインド。隠蔽率80%。',                      8000,  true,  80, 16,   250),
+('三脚',                              'structure', 6, 0, '銃器を安定させる三脚。隠蔽率80%。',                      16000, true,  80, 32,   130),
+('ツリースタンド',                    'structure', 6, 0, '木に取り付けて高所から狩猟するためのスタンド。',         16000, true,  80, 32,   100),
+('レイアウトブラインド（地上型）',    'structure', 3, 0, '地上設置型の低姿勢ブラインド。隠蔽率80%。',             16000, true,  80, 16,   100),
+('レイアウトブラインド（水上型）',    'structure', 3, 0, '水上設置型の低姿勢ブラインド。隠蔽率80%。',             16000, true,  80, 16,   100),
+('テント',                            'structure', 6, 0, 'フィールドに設置できる携帯テント。昼夜サイクルをスキップ可能。', 16000, false, NULL, 16, 250);
 
 -- =====================================================
 -- HUNTING AREAS
