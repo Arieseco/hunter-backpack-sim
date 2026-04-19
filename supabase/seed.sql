@@ -273,12 +273,17 @@ INSERT INTO items (name, category, weight, weight_bonus, description, target_ani
  'すべての呼び寄せ可能な種', 200, 40, NULL, 0, 0);
 
 -- Scent items (匂いアイテム)
-INSERT INTO items (name, category, weight, weight_bonus, description) VALUES
-('ニオイ消しスプレー', 'scent', 0.30, 0, 'プレイヤーの臭いを軽減し、動物に気づかれにくくする。'),
-('アトラクタント（鹿）', 'scent', 0.30, 0, '鹿を引き付ける誘引剤。地面に撒いて使用。'),
-('アトラクタント（エルク）', 'scent', 0.30, 0, 'エルクを引き付ける誘引剤。'),
-('アトラクタント（クマ）', 'scent', 0.30, 0, 'クマを引き付ける誘引剤。'),
-('ニオイ消しパウダー', 'scent', 0.20, 0, '体から出る臭いをより長時間中和するパウダー。');
+-- Columns: name, category, weight, weight_bonus, description, target_animals, effective_distance, attraction, effective_duration, price, unlock_level
+INSERT INTO items (name, category, weight, weight_bonus, description, target_animals, effective_distance, attraction, effective_duration, price, unlock_level) VALUES
+('ノロジカの匂い',       'scent', 0.5, 0, 'ノロジカを誘引する匂いアイテム。',         'ノロジカ',           200, 50, 300, 1500, 7),
+('アカシカの匂い',       'scent', 0.5, 0, 'アカシカを誘引する匂いアイテム。',         'アカシカ',           200, 50, 300, 1500, 17),
+('ヘラジカの匂い',       'scent', 0.5, 0, 'ヘラジカを誘引する匂いアイテム。',         'ヘラジカ',           200, 50, 300, 1500, 19),
+('エルクの匂い',         'scent', 0.5, 0, 'アメリカアカシカを誘引する匂いアイテム。', 'アメリカアカシカ',   200, 50, 300, 1500, 21),
+('オグロジカの匂い',     'scent', 0.5, 0, 'オグロジカを誘引する匂いアイテム。',       'オグロジカ',         200, 50, 300, 1500, 23),
+('オジロジカの匂い',     'scent', 0.5, 0, 'オジロジカを誘引する匂いアイテム。',       'オジロジカ',         200, 50, 300, 1500, 31),
+('イノシシの匂い',       'scent', 0.5, 0, 'イノシシを誘引する匂いアイテム。',         'イノシシ',           200, 50, 300, 1500, 33),
+('ジャコウジカの匂い',   'scent', 0.5, 0, 'シベリアジャコウジカを誘引する匂いアイテム。', 'シベリアジャコウジカ', 200, 50, 300, 1500, 0),
+('ミュールジカの匂い',   'scent', 0.5, 0, 'ミュールジカを誘引する匂いアイテム。',     'ミュールジカ',       200, 50, 300, 1500, 0);
 
 -- Equipment (装備)
 -- Columns: name, category, weight, weight_bonus, description, item_type, price, unlock_level
