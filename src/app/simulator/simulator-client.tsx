@@ -1,444 +1,777 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import {
   DndContext,
   DragOverlay,
   useDraggable,
   useDroppable,
-  type DragEndEvent,
   type DragStartEvent,
-} from "@dnd-kit/core";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Search, X, Save, Check, Trash2 } from "lucide-react";
-import type { Firearm, Ammo, Item, HuntingArea, AreaAnimal, Animal } from "@/lib/database.types";
-import { calculateCapacity } from "@/lib/weight";
-import { supabase } from "@/lib/supabase";
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { Search, Save, Check, X, Package, Weight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { calculateCapacity } from "@/lib/weight"
+import {
+  type Firearm,
+  type Ammo,
+  type Item,
+  type HuntingArea,
+  type Animal,
+  type AreaAnimal,
+  type FirearmAmmo,
+  FIREARM_TYPE_LABEL,
+  ITEM_CATEGORY_LABEL,
+} from "@/lib/database.types"
+import { supabase } from "@/lib/supabase"
 
+// 判別共用体型
 type SlotItem =
   | { kind: "firearm"; data: Firearm }
   | { kind: "ammo"; data: Ammo }
-  | { kind: "item"; data: Item };
+  | { kind: "item"; data: Item }
 
-interface Props {
-  firearms: Firearm[];
-  ammo: Ammo[];
-  items: Item[];
-  areas: HuntingArea[];
-  areaAnimals: AreaAnimal[];
-  animals: Animal[];
+interface SimulatorClientProps {
+  firearms: Firearm[]
+  ammo: Ammo[]
+  items: Item[]
+  areas: HuntingArea[]
+  areaAnimals: AreaAnimal[]
+  animals: Animal[]
+  firearmAmmo: FirearmAmmo[]
 }
 
-const FIREARM_TYPE_LABEL: Record<string, string> = {
-  rifle: "ライフル",
-  shotgun: "ショットガン",
-  handgun: "ハンドガン",
-  bow: "弓",
-};
+// カテゴリフィルタのオプション（弾薬は動的に追加）
+const BASE_FILTER_OPTIONS = [
+  { value: "all", label: "すべて" },
+  { value: "firearm", label: "銃器" },
+  { value: "call", label: "呼び笛" },
+  { value: "scent", label: "匂い消し" },
+  { value: "equipment", label: "装備品" },
+  { value: "structure", label: "構造物" },
+]
 
-const ITEM_CATEGORY_LABEL: Record<string, string> = {
-  call: "呼び笛",
-  scent: "匂い",
-  equipment: "装備",
-  structure: "構造物",
-  backpack: "バックパック",
-};
+const AMMO_FILTER_OPTION = { value: "ammo", label: "弾薬" }
 
-function DraggableCard({ id, children }: { id: string; children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+export function SimulatorClient({
+  firearms,
+  ammo,
+  items,
+  areas,
+  areaAnimals,
+  animals,
+  firearmAmmo,
+}: SimulatorClientProps) {
+  // 状態
+  const [search, setSearch] = useState("")
+  const [filterCategory, setFilterCategory] = useState("all")
+  const [equipped, setEquipped] = useState<SlotItem[]>([])
+  const [backpackId, setBackpackId] = useState<string | null>(null)
+  const [packMule, setPackMule] = useState(false)
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle")
+  const [savedUrl, setSavedUrl] = useState<string | null>(null)
+  const [simName, setSimName] = useState("")
+
+  // 派生値
+  const backpacks = items.filter((i) => i.category === "backpack")
+  const selectedBackpack = backpacks.find((b) => b.id === backpackId)
+  const backpackBonus = selectedBackpack?.weight_bonus ?? 0
+  const capacity = calculateCapacity(packMule, backpackBonus)
+  const totalWeight = equipped.reduce((sum, s) => sum + s.data.weight, 0)
+  const overWeight = totalWeight > capacity
+  const progressValue = Math.min((totalWeight / capacity) * 100, 100)
+
+  // 選択狩猟区の動物一覧
+  const areaAnimalIds = areaAnimals
+    .filter((aa) => aa.area_id === selectedAreaId)
+    .map((aa) => aa.animal_id)
+  const areaAnimalsFiltered = animals.filter((a) => areaAnimalIds.includes(a.id))
+
+  // 狩猟適正レベル（その狩猟区の動物のクラス範囲）
+  const huntingClassRange = useMemo(() => {
+    if (areaAnimalsFiltered.length === 0) return null
+    const minClass = Math.min(...areaAnimalsFiltered.map((a) => a.level_min))
+    const maxClass = Math.max(...areaAnimalsFiltered.map((a) => a.level_max))
+    return { min: minClass, max: maxClass }
+  }, [areaAnimalsFiltered])
+
+  // アイテムリスト（バックパック除く）
+  const allItems: SlotItem[] = [
+    ...firearms.map((f) => ({ kind: "firearm" as const, data: f })),
+    ...ammo.map((a) => ({ kind: "ammo" as const, data: a })),
+    ...items
+      .filter((i) => i.category !== "backpack")
+      .map((i) => ({ kind: "item" as const, data: i })),
+  ]
+
+  // 装備済みアイテムのIDセット
+  const equippedIds = new Set(equipped.map((slot) => slot.data.id))
+
+  // 装備中の銃器ID一覧
+  const equippedFirearmIds = equipped
+    .filter((slot) => slot.kind === "firearm")
+    .map((slot) => slot.data.id)
+
+  // 装備中の銃器に対応する弾薬ID一覧
+  const availableAmmoIds = new Set(
+    firearmAmmo
+      .filter((fa) => equippedFirearmIds.includes(fa.firearm_id))
+      .map((fa) => fa.ammo_id)
+  )
+
+  // 装備中の弾薬ID一覧
+  const equippedAmmoIds = useMemo(() => {
+    return equipped.filter((slot) => slot.kind === "ammo").map((slot) => slot.data.id)
+  }, [equipped])
+
+  // 装備中の弾薬から対応クラス範囲を計算
+  const equippedClassRanges = useMemo(() => {
+    const equippedAmmoList = ammo.filter((a) => equippedAmmoIds.includes(a.id))
+    if (equippedAmmoList.length === 0) return []
+    return equippedAmmoList.map((a) => ({ min: a.class_min, max: a.class_max }))
+  }, [ammo, equippedAmmoIds])
+
+  // 動物が狩猟可能かチェック（装備中の弾薬のクラス範囲内にあるか）
+  const isAnimalHuntable = useCallback(
+    (animal: Animal): boolean => {
+      if (equippedClassRanges.length === 0) return false
+      return equippedClassRanges.some(
+        (range) => range.min !== null && range.max !== null &&
+          range.min <= animal.level_max && range.max >= animal.level_min
+      )
+    },
+    [equippedClassRanges]
+  )
+
+  // 全ての出現動物が狩猟可能かチェック
+  const allAnimalsHuntable = useMemo(() => {
+    if (areaAnimalsFiltered.length === 0) return false
+    return areaAnimalsFiltered.every((animal) => isAnimalHuntable(animal))
+  }, [areaAnimalsFiltered, isAnimalHuntable])
+
+  // 銃器が装備されている場合のみ弾薬フィルタを表示
+  const hasEquippedFirearms = equippedFirearmIds.length > 0
+  const filterOptions = hasEquippedFirearms
+    ? [
+        BASE_FILTER_OPTIONS[0], // all
+        BASE_FILTER_OPTIONS[1], // firearm
+        AMMO_FILTER_OPTION,     // ammo
+        ...BASE_FILTER_OPTIONS.slice(2),
+      ]
+    : BASE_FILTER_OPTIONS
+
+  // 銃器がなくなったら弾薬フィルタをリセット
+  useEffect(() => {
+    if (!hasEquippedFirearms && filterCategory === "ammo") {
+      setFilterCategory("all")
+    }
+  }, [hasEquippedFirearms, filterCategory])
+
+  // フィルタ適用
+  const filtered = allItems.filter((slot) => {
+    // 既に装備中のアイテムは除外
+    if (equippedIds.has(slot.data.id)) return false
+
+    // 弾薬は装備中の銃器に対応するもののみ表示
+    if (slot.kind === "ammo") {
+      if (!availableAmmoIds.has(slot.data.id)) return false
+    }
+
+    // 検索フィルタ
+    const matchSearch = slot.data.name.toLowerCase().includes(search.toLowerCase())
+    if (!matchSearch) return false
+
+    // カテゴリフィルタ
+    if (filterCategory === "all") return true
+    if (filterCategory === "firearm") return slot.kind === "firearm"
+    if (filterCategory === "ammo") return slot.kind === "ammo"
+    if (slot.kind === "item") {
+      return slot.data.category === filterCategory
+    }
+    return false
+  })
+
+  // バッジラベル取得
+  const getBadge = (slot: SlotItem): string | undefined => {
+    if (slot.kind === "firearm") {
+      return FIREARM_TYPE_LABEL[slot.data.type]
+    }
+    if (slot.kind === "ammo") {
+      if (slot.data.class_min !== null && slot.data.class_max !== null) {
+        return `Cl.${slot.data.class_min}-${slot.data.class_max}`
+      }
+      return undefined
+    }
+    if (slot.kind === "item") {
+      return ITEM_CATEGORY_LABEL[slot.data.category]
+    }
+    return undefined
+  }
+
+  // ドラッグ開始
+  const handleDragStart = useCallback((e: DragStartEvent) => {
+    setActiveId(String(e.active.id))
+  }, [])
+
+  // ドラッグ終了
+  const handleDragEnd = useCallback(
+    (e: DragEndEvent) => {
+      setActiveId(null)
+      if (e.over?.id === "equipped") {
+        const slot = allItems.find((s) => s.data.id === String(e.active.id))
+        if (slot) {
+          setEquipped((prev) => [...prev, slot])
+        }
+      }
+    },
+    [allItems]
+  )
+
+  // 装備追加（タップ用）
+  const addEquipped = useCallback((slot: SlotItem) => {
+    console.log("[v0] addEquipped called:", { kind: slot.kind, id: slot.data.id, name: slot.data.name })
+    setEquipped((prev) => {
+      const newEquipped = [...prev, slot]
+      console.log("[v0] newEquipped:", newEquipped.map(s => ({ kind: s.kind, id: s.data.id, name: s.data.name })))
+      return newEquipped
+    })
+  }, [])
+
+  // 装備解除
+  const removeEquipped = (index: number) => {
+    setEquipped((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // 保存処理
+  const handleSave = async () => {
+    setSaveState("saving")
+    try {
+      const selectedItems = equipped.map((slot) => ({
+        type: slot.kind,
+        id: slot.data.id,
+        quantity: 1,
+      }))
+
+      const { data, error } = (await (supabase as unknown as { from: (table: string) => { insert: (data: object) => { select: (columns: string) => { single: () => Promise<{ data: { id: string } | null; error: unknown }> } } } })
+        .from("simulations")
+        .insert({
+          name: simName || null,
+          pack_mule: packMule,
+          backpack_item_id: backpackId,
+          selected_items: selectedItems,
+          total_weight: totalWeight,
+          capacity: capacity,
+        })
+        .select("id")
+        .single()) as { data: { id: string } | null; error: unknown }
+
+      if (error || !data) {
+        setSaveState("idle")
+        return
+      }
+
+      setSavedUrl(`${window.location.origin}/simulator/${data.id}`)
+      setSaveState("saved")
+    } catch {
+      setSaveState("idle")
+    }
+  }
+
+  // アクティブなスロットアイテム（DragOverlay用）
+  const activeSlot = activeId ? allItems.find((s) => s.data.id === activeId) : null
+
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={`cursor-grab active:cursor-grabbing ${isDragging ? "opacity-40" : ""}`}
-    >
-      {children}
-    </div>
-  );
-}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+          重量シミュレータ
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          装備をタップまたはドラッグ&ドロップで追加し、合計重量を確認できます
+        </p>
 
-function DropZone({ children }: { children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "equipped" });
-  return (
-    <div
-      ref={setNodeRef}
-      className={`min-h-32 rounded-lg border-2 border-dashed transition-colors p-2 ${
-        isOver ? "border-amber-500 bg-amber-950/20" : "border-stone-700"
-      }`}
-    >
-      {children}
-    </div>
-  );
-}
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 左: アイテムリスト */}
+            <div className="space-y-4">
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                    <Package className="size-5" />
+                    アイテム一覧
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* 検索・フィルタ */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                      <Input
+                        placeholder="アイテムを検索..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-10 bg-background border-border"
+                      />
+                    </div>
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger className="w-full sm:w-[140px] bg-background border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-function ItemCard({ label, weight, description, badge }: {
-  label: string;
-  weight: number;
-  description: string | null;
-  badge?: string;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger className="w-full text-left">
-        <div className="px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm select-none">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-stone-100 truncate">{label}</span>
-            <div className="flex items-center gap-2 shrink-0">
-              {badge && (
-                <Badge variant="outline" className="border-stone-600 text-stone-400 text-xs">
-                  {badge}
-                </Badge>
-              )}
-              <span className="text-amber-400 text-xs">{weight} kg</span>
+                  {/* アイテムグリッド */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
+                    {filtered.length === 0 ? (
+                      <p className="text-muted-foreground text-sm col-span-2 py-8 text-center">
+                        アイテムが見つかりません
+                      </p>
+                    ) : (
+                      filtered.map((slot) => (
+                        <DraggableCard
+                          key={slot.data.id}
+                          id={slot.data.id}
+                          onTap={() => addEquipped(slot)}
+                        >
+                          <ItemCard
+                            label={slot.data.name}
+                            weight={slot.data.weight}
+                            description={
+                              "description" in slot.data ? slot.data.description : null
+                            }
+                            badge={getBadge(slot)}
+                          />
+                        </DraggableCard>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 狩猟区選択 */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">狩猟区を選択</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Select
+                    value={selectedAreaId ?? "none"}
+                    onValueChange={(v) => setSelectedAreaId(v === "none" ? null : v)}
+                  >
+                    <SelectTrigger className="bg-background border-border">
+                      <SelectValue placeholder="狩猟区を選択..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">選択なし</SelectItem>
+                      {areas.map((area) => (
+                        <SelectItem key={area.id} value={area.id}>
+                          {area.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {selectedAreaId && areaAnimalsFiltered.length > 0 && (
+                    <div className="space-y-4">
+                      {/* 狩猟適正レベル */}
+                      {huntingClassRange && (
+                        <div
+                          className={cn(
+                            "p-3 rounded-lg border transition-all",
+                            allAnimalsHuntable
+                              ? "bg-green-500/20 border-green-500/50"
+                              : "bg-muted/30 border-border opacity-60"
+                          )}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm text-muted-foreground">狩猟適正レベル:</p>
+                            {allAnimalsHuntable && (
+                              <Check className="h-4 w-4 text-green-500" />
+                            )}
+                          </div>
+                          <p
+                            className={cn(
+                              "text-xl font-bold",
+                              allAnimalsHuntable ? "text-green-500" : "text-muted-foreground"
+                            )}
+                          >
+                            クラス {huntingClassRange.min} - {huntingClassRange.max}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* 出現動物 */}
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">出現動物:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {areaAnimalsFiltered.map((animal) => {
+                            const huntable = isAnimalHuntable(animal)
+                            return (
+                              <Badge
+                                key={animal.id}
+                                variant="secondary"
+                                className={cn(
+                                  "transition-all flex items-center gap-1",
+                                  huntable
+                                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                                    : "bg-secondary/50 text-muted-foreground opacity-60"
+                                )}
+                              >
+                                {huntable && <Check className="h-3 w-3" />}
+                                {animal.name} (Lv.{animal.level_min}-{animal.level_max})
+                              </Badge>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 右: 装備中パネル */}
+            <div className="space-y-4">
+              {/* 設定パネル */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">設定</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* 荷運びラバ */}
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="pack-mule"
+                      className="text-foreground flex flex-col gap-1"
+                    >
+                      <span>荷運びラバ</span>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        容量が15%増加します
+                      </span>
+                    </Label>
+                    <Switch
+                      id="pack-mule"
+                      checked={packMule}
+                      onCheckedChange={setPackMule}
+                    />
+                  </div>
+
+                  {/* バックパック選択 */}
+                  <div className="space-y-2">
+                    <Label className="text-foreground">バックパック</Label>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant={backpackId === null ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => setBackpackId(null)}
+                        className={cn(
+                          backpackId === null
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
+                        )}
+                      >
+                        なし
+                      </Button>
+                      {backpacks.map((bp) => (
+                        <Button
+                          key={bp.id}
+                          variant={backpackId === bp.id ? "default" : "secondary"}
+                          size="sm"
+                          onClick={() => setBackpackId(bp.id)}
+                          className={cn(
+                            backpackId === bp.id
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-secondary-foreground"
+                          )}
+                        >
+                          {bp.name} (+{bp.weight_bonus})
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 重量表示 */}
+              <Card
+                className={cn(
+                  "bg-card border-2 transition-colors",
+                  overWeight ? "border-red-600" : "border-primary"
+                )}
+              >
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                    <Weight className="size-5" />
+                    重量
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <span
+                        className={cn(
+                          "text-4xl font-bold font-mono",
+                          overWeight ? "text-red-500" : "text-primary"
+                        )}
+                      >
+                        {totalWeight.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground ml-1">
+                        / {capacity.toFixed(1)} kg
+                      </span>
+                    </div>
+                    {overWeight && (
+                      <span className="text-red-500 text-sm font-medium">
+                        重量超過!
+                      </span>
+                    )}
+                  </div>
+                  <Progress
+                    value={progressValue}
+                    className={cn(
+                      "h-3",
+                      overWeight ? "[&>div]:bg-red-500" : "[&>div]:bg-primary"
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* 装備中リスト */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">装備中</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DropZone>
+                    {equipped.length === 0 ? (
+                      <p className="text-muted-foreground text-sm py-8 text-center border-2 border-dashed border-border rounded-lg">
+                        アイテムをタップして追加
+                      </p>
+                    ) : (
+                      <div className="space-y-2 min-h-[100px]">
+                        {equipped.map((slot, index) => (
+                          <div
+                            key={`${slot.data.id}-${index}`}
+                            className="flex items-center justify-between p-3 bg-secondary rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-foreground">{slot.data.name}</span>
+                              {getBadge(slot) && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs border-border text-muted-foreground"
+                                >
+                                  {getBadge(slot)}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-muted-foreground font-mono text-sm">
+                                {slot.data.weight.toFixed(1)} kg
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeEquipped(index)}
+                                className="size-8 text-muted-foreground hover:text-red-500"
+                              >
+                                <X className="size-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </DropZone>
+                </CardContent>
+              </Card>
+
+              {/* 保存パネル */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">保存</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input
+                    placeholder="シミュレーション名（任意）"
+                    value={simName}
+                    onChange={(e) => setSimName(e.target.value)}
+                    className="bg-background border-border"
+                  />
+                  <Button
+                    onClick={handleSave}
+                    disabled={equipped.length === 0 || saveState !== "idle"}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {saveState === "saved" ? (
+                      <>
+                        <Check className="size-4 mr-2" />
+                        保存済み
+                      </>
+                    ) : (
+                      <>
+                        <Save className="size-4 mr-2" />
+                        保存してURLを発行
+                      </>
+                    )}
+                  </Button>
+                  {savedUrl && (
+                    <div className="p-3 bg-secondary rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-1">共有URL:</p>
+                      <p className="text-sm text-primary break-all font-mono">{savedUrl}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </div>
-      </TooltipTrigger>
-      {description && (
-        <TooltipContent side="right" className="max-w-xs bg-stone-800 border-stone-600 text-stone-200">
-          <p className="text-xs leading-relaxed">{description}</p>
-        </TooltipContent>
-      )}
-    </Tooltip>
-  );
-}
 
-export function SimulatorClient({ firearms, ammo, items, areas, areaAnimals, animals }: Props) {
-  const [search, setSearch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [equipped, setEquipped] = useState<SlotItem[]>([]);
-  const [backpackId, setBackpackId] = useState<string | null>(null);
-  const [packMule, setPackMule] = useState(false);
-  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
-  const [savedUrl, setSavedUrl] = useState<string | null>(null);
-  const [simName, setSimName] = useState("");
-
-  const backpacks = items.filter((i) => i.category === "backpack");
-  const selectedBackpack = backpacks.find((b) => b.id === backpackId) ?? null;
-  const backpackBonus = selectedBackpack?.weight_bonus ?? 0;
-  const capacity = calculateCapacity(packMule, backpackBonus);
-
-  const totalWeight = equipped.reduce((sum, slot) => sum + slot.data.weight, 0);
-  const overWeight = totalWeight > capacity;
-
-  const areaAnimalIds = selectedAreaId
-    ? areaAnimals.filter((aa) => aa.area_id === selectedAreaId).map((aa) => aa.animal_id)
-    : [];
-  const areaAnimalsFiltered = animals.filter((a) => areaAnimalIds.includes(a.id));
-
-  const allItems: SlotItem[] = [
-    ...firearms.map((f): SlotItem => ({ kind: "firearm", data: f })),
-    ...ammo.map((a): SlotItem => ({ kind: "ammo", data: a })),
-    ...items.filter((i) => i.category !== "backpack").map((i): SlotItem => ({ kind: "item", data: i })),
-  ];
-
-  const filtered = allItems.filter((slot) => {
-    const name = slot.data.name.toLowerCase();
-    if (!name.includes(search.toLowerCase())) return false;
-    if (filterCategory === "all") return true;
-    if (filterCategory === "firearm") return slot.kind === "firearm";
-    if (filterCategory === "ammo") return slot.kind === "ammo";
-    if (slot.kind === "item") return slot.data.category === filterCategory;
-    return false;
-  });
-
-  function getBadge(slot: SlotItem): string | undefined {
-    if (slot.kind === "firearm") return FIREARM_TYPE_LABEL[slot.data.type];
-    if (slot.kind === "ammo") {
-      const a = slot.data as Ammo;
-      if (a.class_min != null && a.class_max != null)
-        return `Cl.${a.class_min}-${a.class_max}`;
-    }
-    if (slot.kind === "item") return ITEM_CATEGORY_LABEL[slot.data.category];
-    return undefined;
-  }
-
-  const handleDragStart = useCallback((e: DragStartEvent) => {
-    setActiveId(String(e.active.id));
-  }, []);
-
-  const handleDragEnd = useCallback((e: DragEndEvent) => {
-    setActiveId(null);
-    if (e.over?.id === "equipped") {
-      const id = String(e.active.id);
-      const slot = allItems.find((s) => s.data.id === id);
-      if (slot) {
-        setEquipped((prev) => [...prev, slot]);
-      }
-    }
-  }, [allItems]);
-
-  function removeEquipped(index: number) {
-    setEquipped((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  async function handleSave() {
-    setSaveState("saving");
-    const selectedItems = equipped.map((s) => ({
-      type: s.kind === "ammo" ? "ammo" : s.kind === "firearm" ? "firearm" : "item",
-      id: s.data.id,
-      quantity: 1,
-    }));
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("simulations")
-      .insert({
-        name: simName || null,
-        pack_mule: packMule,
-        backpack_item_id: backpackId,
-        selected_items: selectedItems,
-        total_weight: totalWeight,
-        capacity,
-      })
-      .select("id")
-      .single() as { data: { id: string } | null; error: unknown };
-
-    if (!error && data) {
-      setSavedUrl(`/simulator/${data.id}`);
-      setSaveState("saved");
-    } else {
-      setSaveState("idle");
-    }
-  }
-
-  const activeSlot = activeId ? allItems.find((s) => s.data.id === activeId) : null;
-
-  return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-white mb-6">重量シミュレータ</h1>
-
-        {/* Hunting area selector */}
-        <div className="mb-6 p-4 bg-stone-900 border border-stone-700 rounded-xl">
-          <div className="flex flex-wrap items-start gap-6">
-            <div className="min-w-48">
-              <label className="text-xs text-stone-400 block mb-2">狩猟区を選択</label>
-              <select
-                className="w-full bg-stone-800 border border-stone-700 text-stone-100 rounded px-3 py-2 text-sm"
-                value={selectedAreaId ?? ""}
-                onChange={(e) => setSelectedAreaId(e.target.value || null)}
-              >
-                <option value="">-- 狩猟区を選択 --</option>
-                {areas.map((area) => (
-                  <option key={area.id} value={area.id}>{area.name}</option>
-                ))}
-              </select>
-            </div>
-            {selectedAreaId && areaAnimalsFiltered.length > 0 && (
-              <div>
-                <p className="text-xs text-stone-400 mb-2">出没動物と適正クラス</p>
-                <div className="flex flex-wrap gap-2">
-                  {areaAnimalsFiltered.map((a) => (
-                    <Badge
-                      key={a.id}
-                      variant="outline"
-                      className="border-stone-600 text-stone-300 text-xs"
-                    >
-                      {a.name} <span className="text-amber-400 ml-1">Cl.{a.level_min}-{a.level_max}</span>
-                    </Badge>
-                  ))}
-                </div>
+          {/* DragOverlay */}
+          <DragOverlay>
+            {activeSlot && (
+              <div className="p-3 bg-card border-2 border-primary rounded-lg shadow-xl opacity-90">
+                <span className="text-foreground">{activeSlot.data.name}</span>
+                <span className="text-muted-foreground ml-2">
+                  {activeSlot.data.weight.toFixed(1)} kg
+                </span>
               </div>
             )}
-          </div>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left panel: item list */}
-          <div className="flex-1 min-w-0">
-            <div className="bg-stone-900 border border-stone-700 rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-stone-300 mb-3">
-                アイテムリスト <span className="text-stone-500 font-normal">（ドラッグして右パネルへ追加）</span>
-              </h2>
-              <div className="flex gap-2 mb-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" />
-                  <Input
-                    placeholder="検索..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500"
-                  />
-                </div>
-                <select
-                  className="bg-stone-800 border border-stone-700 text-stone-300 rounded px-3 text-sm"
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                >
-                  <option value="all">すべて</option>
-                  <option value="firearm">銃器</option>
-                  <option value="ammo">弾薬</option>
-                  <option value="call">呼び笛</option>
-                  <option value="scent">匂い</option>
-                  <option value="equipment">装備</option>
-                  <option value="structure">構造物</option>
-                </select>
-              </div>
-              <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
-                {filtered.map((slot) => (
-                  <DraggableCard key={slot.data.id} id={slot.data.id}>
-                    <ItemCard
-                      label={slot.data.name}
-                      weight={slot.data.weight}
-                      description={slot.data.description}
-                      badge={getBadge(slot)}
-                    />
-                  </DraggableCard>
-                ))}
-                {filtered.length === 0 && (
-                  <p className="text-stone-600 text-sm text-center py-8">
-                    該当するアイテムがありません
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right panel: equipped */}
-          <div className="w-full lg:w-96 shrink-0">
-            <div className="bg-stone-900 border border-stone-700 rounded-xl p-4 sticky top-20">
-              <h2 className="text-sm font-semibold text-stone-300 mb-3">装備中アイテム</h2>
-
-              {/* Weight bar */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-stone-400">重量</span>
-                  <span className={`text-sm font-bold ${overWeight ? "text-red-400" : "text-amber-400"}`}>
-                    {totalWeight.toFixed(2)} / {capacity.toFixed(2)} kg
-                  </span>
-                </div>
-                <Progress
-                  value={Math.min((totalWeight / capacity) * 100, 100)}
-                  className={`h-2 ${overWeight ? "[&>div]:bg-red-500" : "[&>div]:bg-amber-500"}`}
-                />
-                {overWeight && (
-                  <p className="text-xs text-red-400 mt-1">重量超過！</p>
-                )}
-              </div>
-
-              {/* Pack Mule toggle */}
-              <div className="flex items-center justify-between mb-3 py-2 border-t border-stone-800">
-                <div>
-                  <p className="text-sm text-stone-300">荷運びラバ</p>
-                  <p className="text-xs text-stone-500">基本容量+15%（{(20 * 1.15).toFixed(1)}kg）</p>
-                </div>
-                <button
-                  onClick={() => setPackMule((v) => !v)}
-                  className={`w-10 h-6 rounded-full transition-colors relative ${packMule ? "bg-amber-500" : "bg-stone-700"}`}
-                >
-                  <span className={`block w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${packMule ? "translate-x-5" : "translate-x-1"}`} />
-                </button>
-              </div>
-
-              {/* Backpack selector */}
-              <div className="mb-4 border-t border-stone-800 pt-3">
-                <label className="text-xs text-stone-400 block mb-2">バックパック</label>
-                <div className="grid grid-cols-4 gap-1">
-                  <button
-                    onClick={() => setBackpackId(null)}
-                    className={`px-2 py-1.5 rounded text-xs transition-colors ${!backpackId ? "bg-amber-600 text-white" : "bg-stone-800 text-stone-400 hover:bg-stone-700"}`}
-                  >
-                    なし
-                  </button>
-                  {backpacks.map((bp) => (
-                    <button
-                      key={bp.id}
-                      onClick={() => setBackpackId(bp.id)}
-                      className={`px-2 py-1.5 rounded text-xs transition-colors ${backpackId === bp.id ? "bg-amber-600 text-white" : "bg-stone-800 text-stone-400 hover:bg-stone-700"}`}
-                    >
-                      {bp.name.includes("小") ? "小(+3)" : bp.name.includes("中") ? "中(+6)" : "大(+9)"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Drop zone */}
-              <DropZone>
-                {equipped.length === 0 ? (
-                  <p className="text-stone-600 text-sm text-center py-6">
-                    ここにドラッグ&ドロップ
-                  </p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {equipped.map((slot, i) => (
-                      <div key={`${slot.data.id}-${i}`} className="flex items-center gap-2">
-                        <div className="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm">
-                          <div className="flex items-center justify-between">
-                            <span className="text-stone-100 truncate">{slot.data.name}</span>
-                            <span className="text-amber-400 text-xs shrink-0 ml-2">{slot.data.weight} kg</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => removeEquipped(i)}
-                          className="text-stone-600 hover:text-red-400 transition-colors shrink-0"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </DropZone>
-
-              {/* Clear & Save buttons */}
-              <div className="mt-4 border-t border-stone-800 pt-4 space-y-3">
-                <button
-                  onClick={() => setEquipped([])}
-                  className="flex items-center gap-2 text-xs text-stone-500 hover:text-stone-300 transition-colors"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  すべてクリア
-                </button>
-                <Input
-                  placeholder="シミュレーション名（任意）"
-                  value={simName}
-                  onChange={(e) => setSimName(e.target.value)}
-                  className="bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 text-sm"
-                />
-                <button
-                  onClick={handleSave}
-                  disabled={saveState === "saving" || equipped.length === 0}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-700 disabled:text-stone-500 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  {saveState === "saved" ? (
-                    <><Check className="w-4 h-4" /> 保存済み</>
-                  ) : (
-                    <><Save className="w-4 h-4" /> 保存してURLを発行</>
-                  )}
-                </button>
-                {savedUrl && (
-                  <div className="text-xs text-stone-400 break-all">
-                    共有URL:{" "}
-                    <a
-                      href={savedUrl}
-                      className="text-amber-400 hover:underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {typeof window !== "undefined" ? window.location.origin : ""}{savedUrl}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+          </DragOverlay>
+        </DndContext>
       </div>
+    </div>
+  )
+}
 
-      <DragOverlay>
-        {activeSlot && (
-          <div className="px-3 py-2 bg-stone-700 border border-amber-500 rounded-lg text-sm text-stone-100 shadow-xl opacity-90">
-            {activeSlot.data.name} — {activeSlot.data.weight} kg
-          </div>
+// ドラッグ可能 & タップ可能なカード
+function DraggableCard({
+  id,
+  children,
+  onTap,
+}: {
+  id: string
+  children: React.ReactNode
+  onTap: () => void
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null)
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragStartPos.current = { x: e.clientX, y: e.clientY }
+    listeners?.onPointerDown?.(e as unknown as React.PointerEvent<Element>)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (dragStartPos.current) {
+      const dx = Math.abs(e.clientX - dragStartPos.current.x)
+      const dy = Math.abs(e.clientY - dragStartPos.current.y)
+      // 移動距離が小さければタップとみなす
+      if (dx < 5 && dy < 5) {
+        onTap()
+      }
+    }
+    dragStartPos.current = null
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      className={cn(
+        "cursor-pointer md:cursor-grab md:active:cursor-grabbing select-none touch-none",
+        isDragging && "opacity-40"
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+// ドロップゾーン
+function DropZone({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "equipped" })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "transition-colors rounded-lg",
+        isOver && "bg-primary/10 ring-2 ring-primary"
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+// アイテムカード
+function ItemCard({
+  label,
+  weight,
+  description,
+  badge,
+}: {
+  label: string
+  weight: number
+  description: string | null
+  badge?: string
+}) {
+  const content = (
+    <div className="p-3 bg-secondary rounded-lg border border-border hover:border-primary/50 transition-colors">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-foreground text-sm font-medium">{label}</span>
+        {badge && (
+          <Badge variant="outline" className="text-xs border-primary/50 text-primary shrink-0">
+            {badge}
+          </Badge>
         )}
-      </DragOverlay>
-    </DndContext>
-  );
+      </div>
+      <p className="text-muted-foreground text-xs mt-1 font-mono">
+        {weight.toFixed(1)} kg
+      </p>
+    </div>
+  )
+
+  if (description) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[200px]">
+          <p className="text-sm">{description}</p>
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return content
 }

@@ -1,19 +1,29 @@
-import { supabase } from "@/lib/supabase";
-import { FirearmTable } from "@/components/firearm-table";
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
+import { getFirearmsWithClass } from "@/lib/firearms"
+import { FirearmTable } from "@/components/firearm-table"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export default async function RiflesPage() {
-  const { data: firearms } = await supabase
-    .from("firearms")
-    .select("*")
-    .eq("type", "rifle")
-    .order("name");
+  const firearms = await getFirearmsWithClass("rifle")
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-white mb-6">ライフル一覧</h1>
-      <FirearmTable firearms={firearms ?? []} type="rifles" />
+    <div className="container mx-auto px-4 py-8">
+      <Link
+        href="/firearms"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        銃器カテゴリ
+      </Link>
+
+      <h1 className="text-3xl font-bold text-foreground mb-2">ライフル</h1>
+      <p className="text-muted-foreground mb-8">
+        ボルトアクション・レバーアクション等。長距離・大型獣に対応。
+      </p>
+
+      <FirearmTable firearms={firearms} type="rifles" />
     </div>
-  );
+  )
 }
