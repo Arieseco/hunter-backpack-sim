@@ -3,12 +3,19 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Firearms table
 CREATE TABLE IF NOT EXISTS firearms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('rifle', 'shotgun', 'handgun', 'bow')),
-  weight DECIMAL(5,2) NOT NULL,
-  description TEXT,
-  image_url TEXT
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name              TEXT NOT NULL,
+  type              TEXT NOT NULL CHECK (type IN ('rifle', 'shotgun', 'handgun', 'bow', 'muzzleloader')),
+  accuracy          INTEGER,
+  recoil            INTEGER,
+  reload_speed      INTEGER,
+  hipfire_accuracy  INTEGER,
+  magazine_capacity INTEGER,
+  weight            DECIMAL(5,2) NOT NULL,
+  required_score    INTEGER DEFAULT 0,
+  price             INTEGER DEFAULT 0,
+  comment           TEXT,
+  image_url         TEXT
 );
 
 -- Ammo table
@@ -59,6 +66,24 @@ CREATE TABLE IF NOT EXISTS area_animals (
   area_id UUID REFERENCES hunting_areas(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE CASCADE,
   PRIMARY KEY (area_id, animal_id)
+);
+
+-- Scopes table
+CREATE TABLE IF NOT EXISTS scopes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  magnification TEXT NOT NULL,
+  weight DECIMAL(5,2) NOT NULL,
+  required_score INTEGER,
+  price INTEGER,
+  description TEXT
+);
+
+-- Scope-Firearm relationship (many-to-many)
+CREATE TABLE IF NOT EXISTS scope_firearms (
+  scope_id UUID REFERENCES scopes(id) ON DELETE CASCADE,
+  firearm_id UUID REFERENCES firearms(id) ON DELETE CASCADE,
+  PRIMARY KEY (scope_id, firearm_id)
 );
 
 -- Saved simulations
