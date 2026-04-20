@@ -35,10 +35,12 @@ import {
   type Firearm,
   type Ammo,
   type Item,
+  type Scope,
   type HuntingArea,
   type Animal,
   type AreaAnimal,
   type FirearmAmmo,
+  type ScopeFirearm,
   FIREARM_TYPE_LABEL,
   ITEM_CATEGORY_LABEL,
 } from "@/lib/database.types"
@@ -49,6 +51,7 @@ type SlotItem =
   | { kind: "firearm"; data: Firearm }
   | { kind: "ammo"; data: Ammo }
   | { kind: "item"; data: Item }
+  | { kind: "scope"; data: Scope }
 
 interface SimulatorClientProps {
   firearms: Firearm[]
@@ -58,9 +61,11 @@ interface SimulatorClientProps {
   areaAnimals: AreaAnimal[]
   animals: Animal[]
   firearmAmmo: FirearmAmmo[]
+  scopes: Scope[]
+  scopeFirearms: ScopeFirearm[]
 }
 
-// カテゴリフィルタのオプション（弾薬は動的に追加）
+// カテゴリフィルタのオプション（弾薬・スコープは装備時に動的追加）
 const BASE_FILTER_OPTIONS = [
   { value: "all", label: "すべて" },
   { value: "firearm", label: "銃器" },
@@ -70,7 +75,8 @@ const BASE_FILTER_OPTIONS = [
   { value: "structure", label: "構造物" },
 ]
 
-const AMMO_FILTER_OPTION = { value: "ammo", label: "弾薬" }
+const AMMO_FILTER_OPTION  = { value: "ammo",  label: "弾薬" }
+const SCOPE_FILTER_OPTION = { value: "scope", label: "スコープ" }
 
 export function SimulatorClient({
   firearms,
@@ -80,6 +86,8 @@ export function SimulatorClient({
   areaAnimals,
   animals,
   firearmAmmo,
+  scopes,
+  scopeFirearms,
 }: SimulatorClientProps) {
   // 状態
   const [search, setSearch] = useState("")
@@ -122,6 +130,7 @@ export function SimulatorClient({
   const allItems: SlotItem[] = [
     ...firearms.map((f) => ({ kind: "firearm" as const, data: f })),
     ...ammo.map((a) => ({ kind: "ammo" as const, data: a })),
+    ...scopes.map((s) => ({ kind: "scope" as const, data: s })),
     ...items
       .filter((i) => i.category !== "backpack")
       .map((i) => ({ kind: "item" as const, data: i })),
@@ -140,6 +149,13 @@ export function SimulatorClient({
     firearmAmmo
       .filter((fa) => equippedFirearmIds.includes(fa.firearm_id))
       .map((fa) => fa.ammo_id)
+  )
+
+  // 装備中の銃器に対応するスコープID一覧
+  const availableScopeIds = new Set(
+    scopeFirearms
+      .filter((sf) => equippedFirearmIds.includes(sf.firearm_id))
+      .map((sf) => sf.scope_id)
   )
 
   // 装備中の弾薬ID一覧
@@ -172,20 +188,21 @@ export function SimulatorClient({
     return areaAnimalsFiltered.every((animal) => isAnimalHuntable(animal))
   }, [areaAnimalsFiltered, isAnimalHuntable])
 
-  // 銃器が装備されている場合のみ弾薬フィルタを表示
+  // 銃器が装備されている場合のみ弾薬・スコープフィルタを表示
   const hasEquippedFirearms = equippedFirearmIds.length > 0
   const filterOptions = hasEquippedFirearms
     ? [
         BASE_FILTER_OPTIONS[0], // all
         BASE_FILTER_OPTIONS[1], // firearm
         AMMO_FILTER_OPTION,     // ammo
+        SCOPE_FILTER_OPTION,    // scope
         ...BASE_FILTER_OPTIONS.slice(2),
       ]
     : BASE_FILTER_OPTIONS
 
-  // 銃器がなくなったら弾薬フィルタをリセット
+  // 銃器がなくなったら弾薬・スコープフィルタをリセット
   useEffect(() => {
-    if (!hasEquippedFirearms && filterCategory === "ammo") {
+    if (!hasEquippedFirearms && (filterCategory === "ammo" || filterCategory === "scope")) {
       setFilterCategory("all")
     }
   }, [hasEquippedFirearms, filterCategory])
@@ -200,6 +217,11 @@ export function SimulatorClient({
       if (!availableAmmoIds.has(slot.data.id)) return false
     }
 
+    // スコープは装備中の銃器に対応するもののみ表示
+    if (slot.kind === "scope") {
+      if (!availableScopeIds.has(slot.data.id)) return false
+    }
+
     // 検索フィルタ
     const matchSearch = slot.data.name.toLowerCase().includes(search.toLowerCase())
     if (!matchSearch) return false
@@ -208,6 +230,7 @@ export function SimulatorClient({
     if (filterCategory === "all") return true
     if (filterCategory === "firearm") return slot.kind === "firearm"
     if (filterCategory === "ammo") return slot.kind === "ammo"
+    if (filterCategory === "scope") return slot.kind === "scope"
     if (slot.kind === "item") {
       return slot.data.category === filterCategory
     }
@@ -224,6 +247,9 @@ export function SimulatorClient({
         return `Cl.${slot.data.class_min}-${slot.data.class_max}`
       }
       return undefined
+    }
+    if (slot.kind === "scope") {
+      return `${slot.data.magnification}x`
     }
     if (slot.kind === "item") {
       return ITEM_CATEGORY_LABEL[slot.data.category]
@@ -384,7 +410,7 @@ export function SimulatorClient({
                             label={slot.data.name}
                             weight={slot.data.weight}
                             description={
-                              "description" in slot.data ? slot.data.description : null
+                              slot.kind === "firearm" ? slot.data.comment : slot.data.description ?? null
                             }
                             badge={getBadge(slot)}
                             overCapacity={totalWeight + slot.data.weight > capacity}
@@ -685,6 +711,7 @@ function DraggableCard({
       {...attributes}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
+      suppressHydrationWarning
       className={cn(
         "cursor-pointer md:cursor-grab md:active:cursor-grabbing select-none touch-none",
         isDragging && "opacity-40"

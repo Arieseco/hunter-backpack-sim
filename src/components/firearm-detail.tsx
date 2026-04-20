@@ -44,8 +44,8 @@ export function FirearmDetail({
             <Weight className="h-5 w-5 text-primary" />
             <span className="font-medium">{firearm.weight.toFixed(2)} kg</span>
           </div>
-          {firearm.description && (
-            <p className="text-muted-foreground">{firearm.description}</p>
+          {firearm.comment && (
+            <p className="text-muted-foreground">{firearm.comment}</p>
           )}
         </CardContent>
       </Card>

@@ -1,6 +1,6 @@
 // DB型定義 - Supabaseテーブルに対応するTypeScript型
 
-export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow'
+export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow' | 'muzzleloader'
 
 export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 
@@ -8,17 +8,30 @@ export interface Firearm {
   id: string
   name: string
   type: FirearmType
+  accuracy: number
+  recoil: number
+  reload_speed: number
+  hipfire_accuracy: number
+  magazine_capacity: number
   weight: number
-  description: string | null
+  required_score: number
+  price: number
+  comment: string | null
   image_url: string | null
 }
 
 export interface Ammo {
   id: string
   name: string
+  type: string
   weight: number
   class_min: number | null
   class_max: number | null
+  effective_range: number | null
+  penetration: number | null
+  expansion: number | null
+  required_score: number
+  price: number
   description: string | null
 }
 
@@ -49,6 +62,21 @@ export interface Item {
   concealment_rate: number | null
   max_installations: number | null
   disturbance_radius: number | null
+}
+
+export interface Scope {
+  id: string
+  name: string
+  magnification: string
+  weight: number
+  required_score: number | null
+  price: number | null
+  description: string | null
+}
+
+export interface ScopeFirearm {
+  scope_id: string
+  firearm_id: string
 }
 
 export interface HuntingArea {
@@ -92,6 +120,7 @@ export const FIREARM_TYPE_LABEL: Record<FirearmType, string> = {
   shotgun: 'ショットガン',
   handgun: 'ハンドガン',
   bow: '弓',
+  muzzleloader: 'マズルローダー',
 }
 
 export const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {

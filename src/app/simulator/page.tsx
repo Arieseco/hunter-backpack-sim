@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import type { Firearm, Ammo, Item, HuntingArea, Animal, AreaAnimal, FirearmAmmo } from "@/lib/database.types"
+import type { Firearm, Ammo, Item, HuntingArea, Animal, AreaAnimal, FirearmAmmo, Scope, ScopeFirearm } from "@/lib/database.types"
 import { SimulatorClient } from "./simulator-client"
 
 export const dynamic = "force-dynamic"
@@ -14,6 +14,8 @@ export default async function SimulatorPage() {
     { data: areaAnimals },
     { data: animals },
     { data: firearmAmmo },
+    { data: scopes },
+    { data: scopeFirearms },
   ] = await Promise.all([
     supabase
       .from("firearms")
@@ -48,6 +50,15 @@ export default async function SimulatorPage() {
       .from("firearm_ammo")
       .select("*")
       .then((r) => ({ ...r, data: (r.data as FirearmAmmo[] | null) ?? [] })),
+    supabase
+      .from("scopes")
+      .select("*")
+      .order("name", { ascending: true })
+      .then((r) => ({ ...r, data: (r.data as Scope[] | null) ?? [] })),
+    supabase
+      .from("scope_firearms")
+      .select("*")
+      .then((r) => ({ ...r, data: (r.data as ScopeFirearm[] | null) ?? [] })),
   ])
 
   return (
@@ -59,6 +70,8 @@ export default async function SimulatorPage() {
       areaAnimals={areaAnimals}
       animals={animals}
       firearmAmmo={firearmAmmo}
+      scopes={scopes}
+      scopeFirearms={scopeFirearms}
     />
   )
 }
