@@ -9,7 +9,7 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core"
-import { Search, Save, Check, X, Package, Weight } from "lucide-react"
+import { Search, Save, Check, X, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -65,7 +65,7 @@ const BASE_FILTER_OPTIONS = [
   { value: "all", label: "すべて" },
   { value: "firearm", label: "銃器" },
   { value: "call", label: "呼び笛" },
-  { value: "scent", label: "匂い消し" },
+  { value: "scent", label: "匂いアイテム" },
   { value: "equipment", label: "装備品" },
   { value: "structure", label: "構造物" },
 ]
@@ -108,12 +108,14 @@ export function SimulatorClient({
     .map((aa) => aa.animal_id)
   const areaAnimalsFiltered = animals.filter((a) => areaAnimalIds.includes(a.id))
 
-  // 狩猟適正レベル（その狩猟区の動物のクラス範囲）
-  const huntingClassRange = useMemo(() => {
-    if (areaAnimalsFiltered.length === 0) return null
-    const minClass = Math.min(...areaAnimalsFiltered.map((a) => a.level_min))
-    const maxClass = Math.max(...areaAnimalsFiltered.map((a) => a.level_max))
-    return { min: minClass, max: maxClass }
+  // 狩猟適正レベル（その狩猟区の動物が持つクラスを個別列挙）
+  const huntingClasses = useMemo(() => {
+    if (areaAnimalsFiltered.length === 0) return []
+    const classSet = new Set<number>()
+    areaAnimalsFiltered.forEach((a) => {
+      for (let c = a.level_min; c <= a.level_max; c++) classSet.add(c)
+    })
+    return Array.from(classSet).sort((a, b) => a - b)
   }, [areaAnimalsFiltered])
 
   // アイテムリスト（バックパック除く）
@@ -304,12 +306,29 @@ export function SimulatorClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-          重量シミュレータ
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          装備をタップまたはドラッグ&ドロップで追加し、合計重量を確認できます
-        </p>
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-1">
+              重量シミュレータ
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              装備をタップまたはドラッグ&ドロップで追加し、合計重量を確認できます
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className={cn("text-2xl font-bold font-mono", overWeight ? "text-red-500" : "text-primary")}>
+              {totalWeight.toFixed(1)}
+              <span className="text-sm text-muted-foreground font-normal ml-1">/ {capacity.toFixed(1)} kg</span>
+            </p>
+            {overWeight && (
+              <p className="text-red-500 text-xs font-medium">重量超過!</p>
+            )}
+            <Progress
+              value={progressValue}
+              className={cn("h-2 mt-1 w-36", overWeight ? "[&>div]:bg-red-500" : "[&>div]:bg-primary")}
+            />
+          </div>
+        </div>
 
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -368,6 +387,7 @@ export function SimulatorClient({
                               "description" in slot.data ? slot.data.description : null
                             }
                             badge={getBadge(slot)}
+                            overCapacity={totalWeight + slot.data.weight > capacity}
                           />
                         </DraggableCard>
                       ))
@@ -402,7 +422,7 @@ export function SimulatorClient({
                   {selectedAreaId && areaAnimalsFiltered.length > 0 && (
                     <div className="space-y-4">
                       {/* 狩猟適正レベル */}
-                      {huntingClassRange && (
+                      {huntingClasses.length > 0 && (
                         <div
                           className={cn(
                             "p-3 rounded-lg border transition-all",
@@ -411,20 +431,27 @@ export function SimulatorClient({
                               : "bg-muted/30 border-border opacity-60"
                           )}
                         >
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-2">
                             <p className="text-sm text-muted-foreground">狩猟適正レベル:</p>
                             {allAnimalsHuntable && (
                               <Check className="h-4 w-4 text-green-500" />
                             )}
                           </div>
-                          <p
-                            className={cn(
-                              "text-xl font-bold",
-                              allAnimalsHuntable ? "text-green-500" : "text-muted-foreground"
-                            )}
-                          >
-                            クラス {huntingClassRange.min} - {huntingClassRange.max}
-                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {huntingClasses.map((c) => (
+                              <span
+                                key={c}
+                                className={cn(
+                                  "text-sm font-bold px-1.5 py-0.5 rounded",
+                                  allAnimalsHuntable
+                                    ? "bg-green-500/30 text-green-400"
+                                    : "bg-muted text-muted-foreground"
+                                )}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
 
@@ -446,7 +473,7 @@ export function SimulatorClient({
                                 )}
                               >
                                 {huntable && <Check className="h-3 w-3" />}
-                                {animal.name} (Lv.{animal.level_min}-{animal.level_max})
+                                {animal.name} (Lv.{animal.level_min})
                               </Badge>
                             )
                           })}
@@ -460,6 +487,51 @@ export function SimulatorClient({
 
             {/* 右: 装備中パネル */}
             <div className="space-y-4">
+              {/* 装備中リスト */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">装備中</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DropZone>
+                    {equipped.length === 0 ? (
+                      <p className="text-muted-foreground text-sm py-8 text-center border-2 border-dashed border-border rounded-lg">
+                        アイテムをタップして追加
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 min-h-[100px]">
+                        {equipped.map((slot, index) => (
+                          <div
+                            key={`${slot.data.id}-${index}`}
+                            className="flex items-start justify-between p-2 bg-secondary rounded-lg gap-1"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-foreground text-xs font-medium truncate">{slot.data.name}</p>
+                              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                                {getBadge(slot) && (
+                                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-border text-muted-foreground">
+                                    {getBadge(slot)}
+                                  </Badge>
+                                )}
+                                <p className="text-muted-foreground font-mono text-[10px]">{slot.data.weight.toFixed(1)} kg</p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEquipped(index)}
+                              className="size-6 shrink-0 text-muted-foreground hover:text-red-500"
+                            >
+                              <X className="size-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </DropZone>
+                </CardContent>
+              </Card>
+
               {/* 設定パネル */}
               <Card className="bg-card border-border">
                 <CardHeader className="pb-4">
@@ -505,7 +577,7 @@ export function SimulatorClient({
                           key={bp.id}
                           variant={backpackId === bp.id ? "default" : "secondary"}
                           size="sm"
-                          onClick={() => setBackpackId(bp.id)}
+                          onClick={() => setBackpackId(backpackId === bp.id ? null : bp.id)}
                           className={cn(
                             backpackId === bp.id
                               ? "bg-primary text-primary-foreground"
@@ -517,100 +589,6 @@ export function SimulatorClient({
                       ))}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* 重量表示 */}
-              <Card
-                className={cn(
-                  "bg-card border-2 transition-colors",
-                  overWeight ? "border-red-600" : "border-primary"
-                )}
-              >
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
-                    <Weight className="size-5" />
-                    重量
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <span
-                        className={cn(
-                          "text-4xl font-bold font-mono",
-                          overWeight ? "text-red-500" : "text-primary"
-                        )}
-                      >
-                        {totalWeight.toFixed(1)}
-                      </span>
-                      <span className="text-muted-foreground ml-1">
-                        / {capacity.toFixed(1)} kg
-                      </span>
-                    </div>
-                    {overWeight && (
-                      <span className="text-red-500 text-sm font-medium">
-                        重量超過!
-                      </span>
-                    )}
-                  </div>
-                  <Progress
-                    value={progressValue}
-                    className={cn(
-                      "h-3",
-                      overWeight ? "[&>div]:bg-red-500" : "[&>div]:bg-primary"
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* 装備中リスト */}
-              <Card className="bg-card border-border">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-foreground">装備中</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <DropZone>
-                    {equipped.length === 0 ? (
-                      <p className="text-muted-foreground text-sm py-8 text-center border-2 border-dashed border-border rounded-lg">
-                        アイテムをタップして追加
-                      </p>
-                    ) : (
-                      <div className="space-y-2 min-h-[100px]">
-                        {equipped.map((slot, index) => (
-                          <div
-                            key={`${slot.data.id}-${index}`}
-                            className="flex items-center justify-between p-3 bg-secondary rounded-lg"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-foreground">{slot.data.name}</span>
-                              {getBadge(slot) && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs border-border text-muted-foreground"
-                                >
-                                  {getBadge(slot)}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-muted-foreground font-mono text-sm">
-                                {slot.data.weight.toFixed(1)} kg
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeEquipped(index)}
-                                className="size-8 text-muted-foreground hover:text-red-500"
-                              >
-                                <X className="size-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </DropZone>
                 </CardContent>
               </Card>
 
@@ -740,23 +718,30 @@ function ItemCard({
   weight,
   description,
   badge,
+  overCapacity = false,
 }: {
   label: string
   weight: number
   description: string | null
   badge?: string
+  overCapacity?: boolean
 }) {
   const content = (
-    <div className="p-3 bg-secondary rounded-lg border border-border hover:border-primary/50 transition-colors">
+    <div className={cn(
+      "p-3 rounded-lg border transition-colors",
+      overCapacity
+        ? "bg-red-950/40 border-red-800/60 hover:border-red-600"
+        : "bg-secondary border-border hover:border-primary/50"
+    )}>
       <div className="flex items-start justify-between gap-2">
-        <span className="text-foreground text-sm font-medium">{label}</span>
+        <span className={cn("text-sm font-medium", overCapacity ? "text-red-300" : "text-foreground")}>{label}</span>
         {badge && (
-          <Badge variant="outline" className="text-xs border-primary/50 text-primary shrink-0">
+          <Badge variant="outline" className={cn("text-xs shrink-0", overCapacity ? "border-red-700 text-red-400" : "border-primary/50 text-primary")}>
             {badge}
           </Badge>
         )}
       </div>
-      <p className="text-muted-foreground text-xs mt-1 font-mono">
+      <p className={cn("text-xs mt-1 font-mono", overCapacity ? "text-red-400" : "text-muted-foreground")}>
         {weight.toFixed(1)} kg
       </p>
     </div>

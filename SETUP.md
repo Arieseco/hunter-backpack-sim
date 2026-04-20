@@ -21,7 +21,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 Supabaseダッシュボードの **SQL Editor** で以下を順番に実行:
 
 1. `supabase/schema.sql` の内容を実行（テーブル作成）
-2. `supabase/seed.sql` の内容を実行（初期データ投入）
+2. `supabase/migrations/001_add_call_details.sql` を実行
+3. `supabase/migrations/002_add_item_type.sql` を実行
+4. `supabase/migrations/003_add_structure_details.sql` を実行
+5. `supabase/seed.sql` の内容を実行（初期データ投入）
 
 ## 4. 開発サーバーの起動
 
@@ -72,5 +75,10 @@ src/
     └── weight.ts                 # 重量計算ロジック
 supabase/
 ├── schema.sql                    # テーブル定義
-└── seed.sql                      # 初期データ
+├── migrations/                   # スキーマ追加マイグレーション
+│   ├── 001_add_call_details.sql
+│   ├── 002_add_item_type.sql
+│   └── 003_add_structure_details.sql
+├── seed.sql                      # 初期データ
+└── rls.sql                       # Row Level Security ポリシー
 ```

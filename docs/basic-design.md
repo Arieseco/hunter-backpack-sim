@@ -33,7 +33,7 @@ Supabase (PostgreSQL)               ← データベース
 | フレームワーク | Next.js (App Router) | 16.x |
 | 言語 | TypeScript | 5.x |
 | スタイリング | Tailwind CSS | 4.x |
-| UIコンポーネント | shadcn/ui (base-ui ベース) | 最新 |
+| UIコンポーネント | shadcn/ui (Radix UI ベース、new-york スタイル) | 最新 |
 | ドラッグ&ドロップ | @dnd-kit/core | 最新 |
 | アイコン | lucide-react | 最新 |
 | DBクライアント | @supabase/supabase-js | 2.x |
@@ -86,10 +86,15 @@ hunter-simulator/
 │   └── lib/
 │       ├── supabase.ts               # Supabaseクライアント初期化
 │       ├── database.types.ts         # DB型定義（手動管理）
+│       ├── firearms.ts               # 銃器データ取得ユーティリティ
 │       ├── weight.ts                 # 重量計算ロジック
 │       └── utils.ts                  # tailwind cn ユーティリティ
 ├── supabase/
 │   ├── schema.sql                    # テーブル定義
+│   ├── migrations/                   # スキーマ追加マイグレーション
+│   │   ├── 001_add_call_details.sql  # call/scent 用カラム追加
+│   │   ├── 002_add_item_type.sql     # equipment サブカテゴリカラム追加
+│   │   └── 003_add_structure_details.sql # structure 用カラム追加
 │   ├── seed.sql                      # 初期データ
 │   └── rls.sql                       # Row Level Security ポリシー
 ├── docs/
@@ -264,6 +269,17 @@ simulations
 | weight_bonus | DECIMAL(5,2) | DEFAULT 0 | 所持重量増加量（バックパックのみ使用） |
 | description | TEXT | — | 説明文 |
 | image_url | TEXT | — | 画像URL（将来用） |
+| target_animals | TEXT | — | 効果対象動物（call / scent） |
+| effective_distance | INTEGER | — | 有効距離・m（call / scent） |
+| attraction | INTEGER | — | 誘引率（call / scent） |
+| effective_duration | INTEGER | — | 効果時間・秒（call / scent） |
+| price | INTEGER | — | 価格（call / scent / equipment） |
+| unlock_level | INTEGER | — | 解除レベル（call / scent / equipment） |
+| item_type | TEXT | — | サブカテゴリ（equipment：双眼鏡 / その他） |
+| reduces_hunting_pressure | BOOLEAN | — | 狩猟圧軽減フラグ（structure） |
+| concealment_rate | INTEGER | — | 隠蔽率・%（structure） |
+| max_installations | INTEGER | — | 最大設置数（structure） |
+| disturbance_radius | INTEGER | — | 妨害半径・m（structure） |
 
 #### hunting_areas（狩猟区）
 
