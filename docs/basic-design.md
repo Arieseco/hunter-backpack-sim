@@ -45,7 +45,7 @@ Supabase (PostgreSQL)               ← データベース
 |---|---|---|
 | トップページ / カテゴリ一覧 | Static (SSG) | DBアクセス不要 |
 | 銃器・アイテム一覧 / 詳細 | Dynamic (SSR) | DBからデータ取得 |
-| シミュレータ | Dynamic (SSR) + Client Component | 初期データSSR、インタラクションはClient |
+| シミュレータ | Dynamic (SSR) + Client Component | 初期データ（9テーブル）SSR、インタラクションはClient |
 | 保存済みシミュレーション | Dynamic (SSR) | IDでDBから取得 |
 
 ---
@@ -90,11 +90,20 @@ hunter-simulator/
 │       ├── weight.ts                 # 重量計算ロジック
 │       └── utils.ts                  # tailwind cn ユーティリティ
 ├── supabase/
-│   ├── schema.sql                    # テーブル定義
+│   ├── schema.sql                    # テーブル定義（最新状態）
 │   ├── migrations/                   # スキーマ追加マイグレーション
-│   │   ├── 001_add_call_details.sql  # call/scent 用カラム追加
-│   │   ├── 002_add_item_type.sql     # equipment サブカテゴリカラム追加
-│   │   └── 003_add_structure_details.sql # structure 用カラム追加
+│   │   ├── 001_add_call_details.sql       # call/scent 用カラム追加
+│   │   ├── 002_add_item_type.sql          # equipment サブカテゴリカラム追加
+│   │   ├── 003_add_structure_details.sql  # structure 用カラム追加
+│   │   ├── 004_add_scopes.sql             # scopes / scope_firearms テーブル追加
+│   │   ├── 005_recreate_firearms.sql      # firearms を拡張カラムで再作成（+ 全銃器データ投入）
+│   │   ├── 006_recreate_ammo.sql          # ammo に拡張カラム追加（+ 全弾薬データ投入）
+│   │   ├── 007_firearm_ammo.sql           # 銃器-弾薬対応データ投入
+│   │   ├── 008_add_missing_rifles.sql     # 不足ライフルデータ追加
+│   │   ├── 009_scope_firearms.sql         # スコープ-銃器対応データ投入
+│   │   ├── 010_add_scope_r30.sql          # スコープデータ追加
+│   │   ├── 011_fix_rls.sql               # RLSポリシー修正
+│   │   └── 012_fix_scopes_rls.sql        # scopes/scope_firearmsのRLS修正
 │   ├── seed.sql                      # 初期データ
 │   └── rls.sql                       # Row Level Security ポリシー
 ├── docs/
@@ -215,7 +224,9 @@ hunter-simulator/
 ```
 firearms ──── firearm_ammo ──── ammo
   │
-  └─ type: rifle | shotgun | handgun | bow
+  └─ type: rifle | shotgun | handgun | bow | muzzleloader
+
+scopes ──── scope_firearms ──── firearms
 
 items
   └─ category: call | scent | equipment | structure | backpack
@@ -235,9 +246,16 @@ simulations
 |---|---|---|---|
 | id | UUID | PK, DEFAULT uuid_generate_v4() | 主キー |
 | name | TEXT | NOT NULL | 銃器名 |
-| type | TEXT | NOT NULL, CHECK | rifle / shotgun / handgun / bow |
+| type | TEXT | NOT NULL, CHECK | rifle / shotgun / handgun / bow / muzzleloader |
+| accuracy | INTEGER | — | 精度 |
+| recoil | INTEGER | — | 反動 |
+| reload_speed | INTEGER | — | リロード速度 |
+| hipfire_accuracy | INTEGER | — | 腰だめ精度 |
+| magazine_capacity | INTEGER | — | 装弾数 |
 | weight | DECIMAL(5,2) | NOT NULL | 重量（kg） |
-| description | TEXT | — | 説明文 |
+| required_score | INTEGER | DEFAULT 0 | 解除に必要なスコア |
+| price | INTEGER | DEFAULT 0 | 価格 |
+| comment | TEXT | — | コメント（説明文） |
 | image_url | TEXT | — | 画像URL（将来用） |
 
 #### ammo（弾薬・矢）
@@ -249,6 +267,12 @@ simulations
 | weight | DECIMAL(5,2) | NOT NULL | 重量（kg） |
 | class_min | INTEGER | — | 適正クラス最小値 |
 | class_max | INTEGER | — | 適正クラス最大値 |
+| type | TEXT | CHECK | rifle / shotgun / handgun / bow / muzzleloader（マイグレーションで追加） |
+| effective_range | INTEGER | — | 有効射程（m） |
+| penetration | INTEGER | — | 貫通力 |
+| expansion | INTEGER | — | 膨張性 |
+| required_score | INTEGER | DEFAULT 0 | 解除に必要なスコア |
+| price | INTEGER | DEFAULT 0 | 価格 |
 | description | TEXT | — | 説明文 |
 
 #### firearm_ammo（銃器-弾薬対応）
@@ -257,6 +281,25 @@ simulations
 |---|---|---|---|
 | firearm_id | UUID | PK, FK→firearms | 銃器ID |
 | ammo_id | UUID | PK, FK→ammo | 弾薬ID |
+
+#### scopes（スコープ）
+
+| カラム | 型 | 制約 | 説明 |
+|---|---|---|---|
+| id | UUID | PK, DEFAULT uuid_generate_v4() | 主キー |
+| name | TEXT | NOT NULL | スコープ名 |
+| magnification | TEXT | NOT NULL | 倍率（例: "1-5", "3-9"） |
+| weight | DECIMAL(5,2) | NOT NULL | 重量（kg） |
+| required_score | INTEGER | — | 解除に必要なスコア |
+| price | INTEGER | — | 価格 |
+| description | TEXT | — | 説明文 |
+
+#### scope_firearms（スコープ-銃器対応）
+
+| カラム | 型 | 制約 | 説明 |
+|---|---|---|---|
+| scope_id | UUID | PK, FK→scopes | スコープID |
+| firearm_id | UUID | PK, FK→firearms | 銃器ID |
 
 #### items（アイテム）
 
@@ -323,6 +366,7 @@ simulations
 [
   { "type": "firearm", "id": "uuid", "quantity": 1 },
   { "type": "ammo",    "id": "uuid", "quantity": 1 },
+  { "type": "scope",   "id": "uuid", "quantity": 1 },
   { "type": "item",    "id": "uuid", "quantity": 1 }
 ]
 ```
@@ -334,6 +378,8 @@ simulations
 | firearms | 全員許可 | 不可 | 不可 | 不可 |
 | ammo | 全員許可 | 不可 | 不可 | 不可 |
 | firearm_ammo | 全員許可 | 不可 | 不可 | 不可 |
+| scopes | 全員許可 | 不可 | 不可 | 不可 |
+| scope_firearms | 全員許可 | 不可 | 不可 | 不可 |
 | items | 全員許可 | 不可 | 不可 | 不可 |
 | hunting_areas | 全員許可 | 不可 | 不可 | 不可 |
 | animals | 全員許可 | 不可 | 不可 | 不可 |
@@ -361,22 +407,34 @@ simulations
 | Navigation | `components/navigation.tsx` | ドロップダウンナビ。usePathname でアクティブ管理 |
 | FirearmTable | `components/firearm-table.tsx` | テキスト検索フィルタ付き銃器テーブル |
 | ItemTable | `components/item-table.tsx` | テキスト検索フィルタ付きアイテムテーブル |
-| SimulatorClient | `app/simulator/simulator-client.tsx` | シミュレータのすべてのインタラクションを管理 |
+| SimulatorClient | `app/simulator/simulator-client.tsx` | シミュレータのすべてのインタラクションを管理（スコープ対応含む） |
 
 ### 5.3 SimulatorClient の状態管理
 
 ```
 SimulatorClient
-  ├── search: string               検索ワード
-  ├── filterCategory: string       カテゴリフィルタ
-  ├── equipped: SlotItem[]         装備中アイテム一覧
-  ├── backpackId: string | null    選択中バックパックID
-  ├── packMule: boolean            荷運びラバON/OFF
-  ├── selectedAreaId: string|null  選択中狩猟区ID
-  ├── activeId: string | null      ドラッグ中アイテムID
-  ├── saveState: idle|saving|saved 保存状態
-  ├── savedUrl: string | null      発行済みURL
-  └── simName: string              シミュレーション名
+  Props:
+    ├── firearms: Firearm[]
+    ├── ammo: Ammo[]
+    ├── items: Item[]
+    ├── areas: HuntingArea[]
+    ├── areaAnimals: AreaAnimal[]
+    ├── animals: Animal[]
+    ├── firearmAmmo: FirearmAmmo[]     ← 銃器-弾薬対応（弾薬フィルタ用）
+    ├── scopes: Scope[]                ← スコープ一覧
+    └── scopeFirearms: ScopeFirearm[]  ← スコープ-銃器対応（スコープフィルタ用）
+
+  State:
+    ├── search: string               検索ワード
+    ├── filterCategory: string       カテゴリフィルタ
+    ├── equipped: SlotItem[]         装備中アイテム一覧
+    ├── backpackId: string | null    選択中バックパックID
+    ├── packMule: boolean            荷運びラバON/OFF
+    ├── selectedAreaId: string|null  選択中狩猟区ID
+    ├── activeId: string | null      ドラッグ中アイテムID
+    ├── saveState: idle|saving|saved 保存状態
+    ├── savedUrl: string | null      発行済みURL
+    └── simName: string              シミュレーション名
 ```
 
 ---

@@ -73,6 +73,7 @@ const BASE_FILTER_OPTIONS = [
   { value: "scent", label: "匂いアイテム" },
   { value: "equipment", label: "装備品" },
   { value: "structure", label: "構造物" },
+  { value: "feeder", label: "給餌器" },
 ]
 
 const AMMO_FILTER_OPTION  = { value: "ammo",  label: "弾薬" }

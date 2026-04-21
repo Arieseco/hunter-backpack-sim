@@ -19,7 +19,8 @@
 
 ### 2.1 概要
 
-銃器の4カテゴリへのナビゲーション画面。DBアクセスなし・SSG。
+銃器の4カテゴリへのナビゲーション画面。DBアクセスなし・SSG。  
+マズルローダー（`muzzleloader`）はDBに存在するが、専用ページなし。シミュレーターのアイテムリストからのみアクセス可能。
 
 ### 2.2 カテゴリ一覧
 
@@ -40,23 +41,25 @@
 
 ### 3.2 データ取得
 
+`src/lib/firearms.ts` の `getFirearmsWithClass(type)` を使用して、銃器一覧と対応クラス範囲を一括取得する。
+
 ```typescript
 // 例: ライフル一覧
-const { data: firearms } = await supabase
-  .from("firearms")
-  .select("*")
-  .eq("type", "rifle")   // カテゴリによって変わる値
-  .order("name")
+const firearms = await getFirearmsWithClass("rifle")
 ```
 
-| ページ | `.eq("type", ...)` の値 |
+`getFirearmsWithClass` の内部処理:
+1. `firearms` テーブルから指定 type を name 昇順で取得
+2. `firearm_ammo` + `ammo` を結合して各銃器の class_min / class_max を集計
+3. `FirearmWithClass[]`（`Firearm` + `class_min` + `class_max`）を返す
+
+| ページ | `getFirearmsWithClass(...)` の引数 |
 |---|---|
 | ライフル | `"rifle"` |
 | ショットガン | `"shotgun"` |
 | ハンドガン | `"handgun"` |
 | 弓 | `"bow"` |
 
-- 取得失敗時は `[]` を渡す（`?? []`）
 - `export const dynamic = "force-dynamic"` で毎リクエスト時にDBから取得
 
 ### 3.3 レンダリング
@@ -64,8 +67,8 @@ const { data: firearms } = await supabase
 取得したデータを `FirearmTable` コンポーネントに渡す。
 
 ```tsx
-<FirearmTable firearms={firearms ?? []} type="rifles" />
-//                                        ↑ 詳細リンク生成に使う種別文字列
+<FirearmTable firearms={firearms} type="rifles" />
+//                                ↑ 詳細リンク生成に使う種別文字列
 ```
 
 ---
@@ -80,8 +83,10 @@ const { data: firearms } = await supabase
 
 | Prop | 型 | 説明 |
 |---|---|---|
-| `firearms` | `Firearm[]` | 表示する銃器一覧 |
+| `firearms` | `FirearmWithClass[]` | 表示する銃器一覧（対応クラス情報付き） |
 | `type` | `string` | URLパスに使う種別文字列（`"rifles"` など） |
+
+`FirearmWithClass` は `Firearm` に `class_min: number | null` と `class_max: number | null` を追加した型（`src/lib/firearms.ts` で定義）。
 
 ### 4.3 状態
 
@@ -106,20 +111,26 @@ const filtered = firearms.filter((f) =>
 
 ```typescript
 const typeLabel: Record<string, string> = {
-  rifle:   "ライフル",
-  shotgun: "ショットガン",
-  handgun: "ハンドガン",
-  bow:     "弓",
+  rifle:       "ライフル",
+  shotgun:     "ショットガン",
+  handgun:     "ハンドガン",
+  bow:         "弓",
+  muzzleloader:"マズルローダー",
 }
 ```
 
+未定義 type の場合は `typeLabel[firearm.type] ?? firearm.type` でフォールバック。
+
 ### 4.5 テーブル列定義
+
+PC表示（md以上）はテーブル形式、スマホ（md未満）はカード形式で表示。
 
 | 列 | 表示条件 | 内容 |
 |---|---|---|
 | 名前 | 常時 | `firearm.name` |
-| 種類 | sm以上 | `typeLabel[firearm.type]` をバッジ表示 |
-| 重量 | 常時 | `firearm.weight` kg（右寄せ） |
+| 種類 | PC（md以上） | `typeLabel[firearm.type]` をバッジ表示 |
+| 対応クラス | PC（md以上） | `class_min`/`class_max` をバッジ表示（両方nullなら `"-"`） |
+| 重量 | 常時 | `firearm.weight.toFixed(2)` kg（右寄せ） |
 | 詳細リンク | 常時 | `/firearms/{type}/{firearm.id}` へのリンク |
 
 ### 4.6 空状態

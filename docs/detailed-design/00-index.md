@@ -17,3 +17,6 @@
 | 06 | [06-simulator.md](06-simulator.md) | 重量シミュレータ画面 |
 | 07 | [07-saved-simulation.md](07-saved-simulation.md) | 保存済みシミュレーション閲覧画面 |
 | 08 | [08-lib.md](08-lib.md) | 共通ライブラリ（weight / supabase / types） |
+
+## Database
+https://supabase.com/dashboard/project/tbsrrrkyxhyeqydjmyua

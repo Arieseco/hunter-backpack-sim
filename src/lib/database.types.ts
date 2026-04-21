@@ -2,7 +2,7 @@
 
 export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow' | 'muzzleloader'
 
-export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
+export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack' | 'feeder'
 
 export interface Firearm {
   id: string
@@ -129,4 +129,5 @@ export const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {
   equipment: '装備品',
   structure: '構造物',
   backpack: 'バックパック',
+  feeder: '給餌器',
 }

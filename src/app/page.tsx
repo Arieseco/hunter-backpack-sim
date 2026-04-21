@@ -38,13 +38,14 @@ const sections = [
     icon: Package,
     title: "アイテム一覧",
     description:
-      "呼び笛・匂いアイテム・装備・構造物の一覧。重量と説明を確認できます。",
+      "呼び笛・匂いアイテム・装備・構造物・給餌器の一覧。重量と説明を確認できます。",
     highlight: false,
     children: [
       { href: "/items/calls", label: "呼び笛" },
       { href: "/items/scents", label: "匂いアイテム" },
       { href: "/items/equipment", label: "装備" },
       { href: "/items/structures", label: "構造物" },
+      { href: "/items/feeders", label: "給餌器" },
     ],
   },
 ]
