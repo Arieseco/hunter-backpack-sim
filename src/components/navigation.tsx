@@ -27,6 +27,7 @@ const navItems = [
       { href: "/items/scents", label: "匂いアイテム" },
       { href: "/items/equipment", label: "装備" },
       { href: "/items/structures", label: "構造物" },
+      { href: "/items/feeders", label: "給餌器" },
     ],
   },
   { href: "/simulator", label: "重量シミュレータ" },

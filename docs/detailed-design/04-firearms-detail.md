@@ -108,7 +108,7 @@ const ammoList = ammoRaw   as Ammo[] | null
 ┌────────────────────────────────────┐
 │ {firearm.name}                     │
 │ 重量: {firearm.weight} kg          │
-│ {firearm.description}（任意）        │
+│ {firearm.comment}（任意）           │
 └────────────────────────────────────┘
 
 対応弾薬・矢
