@@ -69,7 +69,7 @@ Supabase CLIによる自動生成は使用していない。
 #### `FirearmType`
 
 ```typescript
-type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow'
+type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow' | 'muzzleloader'
 ```
 
 #### `ItemCategory`
@@ -85,8 +85,15 @@ type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 | `id` | `string` | No |
 | `name` | `string` | No |
 | `type` | `FirearmType` | No |
+| `accuracy` | `number` | Yes |
+| `recoil` | `number` | Yes |
+| `reload_speed` | `number` | Yes |
+| `hipfire_accuracy` | `number` | Yes |
+| `magazine_capacity` | `number` | Yes |
 | `weight` | `number` | No |
-| `description` | `string` | Yes |
+| `required_score` | `number` | No（default 0） |
+| `price` | `number` | No（default 0） |
+| `comment` | `string` | Yes |
 | `image_url` | `string` | Yes |
 
 #### `Ammo`
@@ -95,9 +102,15 @@ type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 |---|---|---|
 | `id` | `string` | No |
 | `name` | `string` | No |
+| `type` | `string` | Yes（rifle / shotgun / handgun / bow / muzzleloader） |
 | `weight` | `number` | No |
 | `class_min` | `number` | Yes |
 | `class_max` | `number` | Yes |
+| `effective_range` | `number` | Yes |
+| `penetration` | `number` | Yes |
+| `expansion` | `number` | Yes |
+| `required_score` | `number` | No（default 0） |
+| `price` | `number` | No（default 0） |
 | `description` | `string` | Yes |
 
 #### `FirearmAmmo`
@@ -106,6 +119,25 @@ type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 |---|---|---|
 | `firearm_id` | `string` | No |
 | `ammo_id` | `string` | No |
+
+#### `Scope`
+
+| フィールド | 型 | nullable |
+|---|---|---|
+| `id` | `string` | No |
+| `name` | `string` | No |
+| `magnification` | `string` | No |
+| `weight` | `number` | No |
+| `required_score` | `number` | Yes |
+| `price` | `number` | Yes |
+| `description` | `string` | Yes |
+
+#### `ScopeFirearm`
+
+| フィールド | 型 | nullable |
+|---|---|---|
+| `scope_id` | `string` | No |
+| `firearm_id` | `string` | No |
 
 #### `Item`
 
@@ -147,7 +179,7 @@ type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 
 | フィールド | 型 | 説明 |
 |---|---|---|
-| `type` | `'firearm' \| 'ammo' \| 'item'` | アイテム種別 |
+| `type` | `'firearm' \| 'ammo' \| 'scope' \| 'item'` | アイテム種別 |
 | `id` | `string` | アイテムのUUID |
 | `quantity` | `number` | 数量（現時点では常に1） |
 
@@ -163,6 +195,28 @@ type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack'
 | `selected_items` | `SimulationItem[]` | No |
 | `total_weight` | `number` | No |
 | `capacity` | `number` | No |
+
+#### ラベル定数
+
+```typescript
+const FIREARM_TYPE_LABEL: Record<FirearmType, string> = {
+  rifle:        'ライフル',
+  shotgun:      'ショットガン',
+  handgun:      'ハンドガン',
+  bow:          '弓',
+  muzzleloader: 'マズルローダー',
+}
+
+const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {
+  call:      '呼び笛',
+  scent:     '匂い消し',
+  equipment: '装備品',
+  structure: '構造物',
+  backpack:  'バックパック',
+}
+```
+
+`simulator-client.tsx` でバッジ表示に使用。
 
 #### `Database`（Supabase型ジェネリクス用、現在は未使用）
 

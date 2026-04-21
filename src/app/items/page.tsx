@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Megaphone, Wind, Backpack, Tent } from "lucide-react"
+import { Megaphone, Wind, Backpack, Tent, Beef } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export const metadata = {
@@ -31,6 +31,12 @@ const categories = [
     href: "/items/structures",
     description: "テント、三脚、ブラインドなどフィールドに設置する構造物。",
     icon: Tent,
+  },
+  {
+    label: "給餌器",
+    href: "/items/feeders",
+    description: "フィールドに設置してターゲット動物を引き寄せる給餌器。",
+    icon: Beef,
   },
 ]
 
