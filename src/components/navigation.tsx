@@ -30,6 +30,7 @@ const navItems = [
       { href: "/items/feeders", label: "給餌器" },
     ],
   },
+  { href: "/animals", label: "動物一覧" },
   { href: "/simulator", label: "重量シミュレータ" },
 ]
 
