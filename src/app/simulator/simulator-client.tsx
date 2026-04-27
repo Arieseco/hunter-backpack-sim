@@ -332,7 +332,7 @@ export function SimulatorClient({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-14 pb-8 md:py-8">
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-1">
@@ -358,10 +358,8 @@ export function SimulatorClient({
         </div>
 
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* 左: アイテムリスト */}
-            <div className="space-y-4">
-              <Card className="bg-card border-border">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-x-8">
+            <Card className="bg-card border-border lg:col-start-1 lg:row-start-1">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg text-foreground flex items-center gap-2">
                     <Package className="size-5" />
@@ -423,8 +421,52 @@ export function SimulatorClient({
                 </CardContent>
               </Card>
 
-              {/* 狩猟区選択 */}
-              <Card className="bg-card border-border">
+            <Card className="bg-card border-border lg:col-start-2 lg:row-start-1">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-foreground">装備中</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DropZone>
+                    {equipped.length === 0 ? (
+                      <p className="text-muted-foreground text-sm py-8 text-center border-2 border-dashed border-border rounded-lg">
+                        アイテムをタップして追加
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 min-h-[100px]">
+                        {equipped.map((slot, index) => (
+                          <div
+                            key={`${slot.data.id}-${index}`}
+                            className="flex items-start justify-between p-2 bg-secondary rounded-lg gap-1"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-foreground text-xs font-medium truncate">{slot.data.name}</p>
+                              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                                {getBadge(slot) && (
+                                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-border text-muted-foreground">
+                                    {getBadge(slot)}
+                                  </Badge>
+                                )}
+                                <p className="text-muted-foreground font-mono text-[10px]">{slot.data.weight.toFixed(1)} kg</p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEquipped(index)}
+                              className="size-6 shrink-0 text-muted-foreground hover:text-red-500"
+                            >
+                              <X className="size-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </DropZone>
+                </CardContent>
+              </Card>
+
+            {/* 狩猟区選択 */}
+            <Card className="bg-card border-border lg:col-start-1 lg:row-start-2">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg text-foreground">狩猟区を選択</CardTitle>
                 </CardHeader>
@@ -510,57 +552,9 @@ export function SimulatorClient({
                   )}
                 </CardContent>
               </Card>
-            </div>
-
-            {/* 右: 装備中パネル */}
-            <div className="space-y-4">
-              {/* 装備中リスト */}
-              <Card className="bg-card border-border">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg text-foreground">装備中</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <DropZone>
-                    {equipped.length === 0 ? (
-                      <p className="text-muted-foreground text-sm py-8 text-center border-2 border-dashed border-border rounded-lg">
-                        アイテムをタップして追加
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2 min-h-[100px]">
-                        {equipped.map((slot, index) => (
-                          <div
-                            key={`${slot.data.id}-${index}`}
-                            className="flex items-start justify-between p-2 bg-secondary rounded-lg gap-1"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="text-foreground text-xs font-medium truncate">{slot.data.name}</p>
-                              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                                {getBadge(slot) && (
-                                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-border text-muted-foreground">
-                                    {getBadge(slot)}
-                                  </Badge>
-                                )}
-                                <p className="text-muted-foreground font-mono text-[10px]">{slot.data.weight.toFixed(1)} kg</p>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeEquipped(index)}
-                              className="size-6 shrink-0 text-muted-foreground hover:text-red-500"
-                            >
-                              <X className="size-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </DropZone>
-                </CardContent>
-              </Card>
 
               {/* 設定パネル */}
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border lg:col-start-2 lg:row-start-2">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg text-foreground">設定</CardTitle>
                 </CardHeader>
@@ -620,7 +614,7 @@ export function SimulatorClient({
               </Card>
 
               {/* 保存パネル */}
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border lg:col-start-2 lg:row-start-3">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg text-foreground">保存</CardTitle>
                 </CardHeader>
@@ -656,7 +650,6 @@ export function SimulatorClient({
                   )}
                 </CardContent>
               </Card>
-            </div>
           </div>
 
           {/* DragOverlay */}

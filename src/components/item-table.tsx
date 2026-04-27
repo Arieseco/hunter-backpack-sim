@@ -51,9 +51,9 @@ export function ItemTable({ items }: ItemTableProps) {
               )}
               {hasStructureDetails && (
                 <>
-                  <th className="py-3 px-4 font-medium text-muted-foreground text-center">狩猟圧軽減</th>
-                  <th className="py-3 px-4 font-medium text-muted-foreground text-right">隠蔽率</th>
-                  <th className="py-3 px-4 font-medium text-muted-foreground text-right">設置数</th>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-center whitespace-nowrap">狩猟圧軽減</th>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-right whitespace-nowrap">隠蔽率</th>
+                  <th className="py-3 px-4 font-medium text-muted-foreground text-right whitespace-nowrap">設置数</th>
                 </>
               )}
               <th className="py-3 px-4 font-medium text-muted-foreground">説明</th>
