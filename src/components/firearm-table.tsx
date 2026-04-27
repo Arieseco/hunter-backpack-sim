@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table"
 import { Search, ChevronRight, Weight, Target } from "lucide-react"
 import type { Firearm } from "@/lib/database.types"
+import type { AmmoClassRange } from "@/lib/firearms"
 
 const typeLabel: Record<string, string> = {
   rifle: "ライフル",
@@ -24,8 +25,7 @@ const typeLabel: Record<string, string> = {
 }
 
 interface FirearmWithAmmo extends Firearm {
-  class_min?: number | null
-  class_max?: number | null
+  ammo_classes: AmmoClassRange[]
 }
 
 interface FirearmTableProps {
@@ -33,12 +33,17 @@ interface FirearmTableProps {
   type: string
 }
 
-function ClassBadge({ min, max }: { min?: number | null; max?: number | null }) {
-  if (min == null && max == null) return <span className="text-muted-foreground text-sm">-</span>
-  if (min === max) {
-    return <Badge variant="outline" className="text-xs">クラス {min}</Badge>
-  }
-  return <Badge variant="outline" className="text-xs">クラス {min} - {max}</Badge>
+function ClassBadge({ classes }: { classes: AmmoClassRange[] }) {
+  if (classes.length === 0) return <span className="text-muted-foreground text-sm">-</span>
+  return (
+    <div className="flex flex-wrap gap-1">
+      {classes.map((r, i) => (
+        <Badge key={i} variant="outline" className="text-xs">
+          {r.min === r.max ? `クラス${r.min}` : `クラス${r.min}-${r.max}`}
+        </Badge>
+      ))}
+    </div>
+  )
 }
 
 export function FirearmTable({ firearms, type }: FirearmTableProps) {
@@ -92,7 +97,7 @@ export function FirearmTable({ firearms, type }: FirearmTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <ClassBadge min={firearm.class_min} max={firearm.class_max} />
+                    <ClassBadge classes={firearm.ammo_classes} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {firearm.weight.toFixed(2)} kg
@@ -133,7 +138,7 @@ export function FirearmTable({ firearms, type }: FirearmTableProps) {
                       {firearm.name}
                     </h3>
                     <div className="mt-2">
-                      <ClassBadge min={firearm.class_min} max={firearm.class_max} />
+                      <ClassBadge classes={firearm.ammo_classes} />
                     </div>
                     <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
