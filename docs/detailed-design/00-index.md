@@ -17,6 +17,5 @@
 | 06 | [06-simulator.md](06-simulator.md) | 重量シミュレータ画面 |
 | 07 | [07-saved-simulation.md](07-saved-simulation.md) | 保存済みシミュレーション閲覧画面 |
 | 08 | [08-lib.md](08-lib.md) | 共通ライブラリ（weight / supabase / types） |
-
-## Database
-https://supabase.com/dashboard/project/tbsrrrkyxhyeqydjmyua
+| 09 | [09-animals-list.md](09-animals-list.md) | 動物一覧画面 |
+| 10 | [10-animals-detail.md](10-animals-detail.md) | 動物詳細画面 |

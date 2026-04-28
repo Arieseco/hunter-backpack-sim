@@ -1,5 +1,26 @@
 # TODO
 
+## 動物詳細画面の実装
+
+### Step 1: DBマイグレーション ✅
+- [x] `animals` テーブルにカラム追加（migration 015）
+- [x] `animal_need_zones` テーブル新規作成
+- [x] `animal_furs` テーブル新規作成
+- [x] `database.types.ts` に新型定義を追加
+
+### Step 2: データ収集（hunter-wiki-scraper） ✅
+- [x] thehuntercotw.fandom.com から各動物ページをスクレイピング（115件）
+- [ ] `output/animal_details.sql` を Supabase で実行（migration 015 の後に流す）
+  - UPDATE animals × 115
+  - INSERT animal_need_zones × 103
+  - INSERT animal_furs × 486
+
+### Step 3: 画面実装（詳細設計書 10 参照） ✅
+- [x] `src/components/animal-detail.tsx` 作成
+- [x] `src/app/animals/[id]/page.tsx` を animal-detail.tsx に差し替え
+
+---
+
 ## ファビコン変更
 ブラウザのタブに表示されているアイコンがデフォルト（Next.js）のままになっている。
 鹿の角のアイコン画像を用意し、`src/app/favicon.ico`（または `public/favicon.ico`）と差し替える。
