@@ -344,8 +344,8 @@ export function SimulatorClient({
           </div>
           <div className="shrink-0 text-right">
             <p className={cn("text-2xl font-bold font-mono", overWeight ? "text-red-500" : "text-primary")}>
-              {totalWeight.toFixed(1)}
-              <span className="text-sm text-muted-foreground font-normal ml-1">/ {capacity.toFixed(1)} kg</span>
+              {totalWeight.toFixed(2)}
+              <span className="text-sm text-muted-foreground font-normal ml-1">/ {capacity.toFixed(2)} kg</span>
             </p>
             {overWeight && (
               <p className="text-red-500 text-xs font-medium">重量超過!</p>
@@ -446,7 +446,7 @@ export function SimulatorClient({
                                     {getBadge(slot)}
                                   </Badge>
                                 )}
-                                <p className="text-muted-foreground font-mono text-[10px]">{slot.data.weight.toFixed(1)} kg</p>
+                                <p className="text-muted-foreground font-mono text-[10px]">{slot.data.weight.toFixed(2)} kg</p>
                               </div>
                             </div>
                             <Button
@@ -658,7 +658,7 @@ export function SimulatorClient({
               <div className="p-3 bg-card border-2 border-primary rounded-lg shadow-xl opacity-90">
                 <span className="text-foreground">{activeSlot.data.name}</span>
                 <span className="text-muted-foreground ml-2">
-                  {activeSlot.data.weight.toFixed(1)} kg
+                  {activeSlot.data.weight.toFixed(2)} kg
                 </span>
               </div>
             )}
@@ -763,7 +763,7 @@ function ItemCard({
         )}
       </div>
       <p className={cn("text-xs mt-1 font-mono", overCapacity ? "text-red-400" : "text-muted-foreground")}>
-        {weight.toFixed(1)} kg
+        {weight.toFixed(2)} kg
       </p>
     </div>
   )
