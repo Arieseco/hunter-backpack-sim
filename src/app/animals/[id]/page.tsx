@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import { Badge } from "@/components/ui/badge"
-import type { Animal } from "@/lib/database.types"
+import { AnimalDetail } from "@/components/animal-detail"
+import type { Animal, AnimalFur, AnimalNeedZone } from "@/lib/database.types"
 
 export const dynamic = "force-dynamic"
 
@@ -19,32 +18,36 @@ export default async function AnimalDetailPage({ params, searchParams }: PagePro
   if (typeof sp.area === "string") backParams.set("area", sp.area)
   const backHref = backParams.toString() ? `/animals?${backParams.toString()}` : "/animals"
 
-  const { data: animalRaw } = await supabase
-    .from("animals")
-    .select("*")
-    .eq("id", id)
-    .single()
+  const [
+    { data: animalRaw },
+    { data: needZonesRaw },
+    { data: fursRaw },
+  ] = await Promise.all([
+    supabase.from("animals").select("*").eq("id", id).single(),
+    supabase
+      .from("animal_need_zones")
+      .select("*, hunting_areas(name)")
+      .eq("animal_id", id)
+      .order("area_id")
+      .order("time_start"),
+    supabase
+      .from("animal_furs")
+      .select("*")
+      .eq("animal_id", id)
+      .order("probability", { ascending: false }),
+  ])
 
   const animal = animalRaw as Animal | null
   if (!animal) notFound()
 
-  const classLabel =
-    animal.level_min === animal.level_max
-      ? `Class ${animal.level_min}`
-      : `Class ${animal.level_min}–${animal.level_max}`
+  type NeedZoneRow = AnimalNeedZone & { hunting_areas: { name: string } | null }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link
-        href={backHref}
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        ← 動物一覧
-      </Link>
-      <div className="mt-6 flex items-center gap-4">
-        <h1 className="text-2xl font-bold text-foreground">{animal.name}</h1>
-        <Badge variant="outline">{classLabel}</Badge>
-      </div>
-    </div>
+    <AnimalDetail
+      animal={animal}
+      needZones={(needZonesRaw ?? []) as NeedZoneRow[]}
+      furs={(fursRaw ?? []) as AnimalFur[]}
+      backHref={backHref}
+    />
   )
 }

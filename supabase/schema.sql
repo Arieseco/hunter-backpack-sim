@@ -55,10 +55,41 @@ CREATE TABLE IF NOT EXISTS hunting_areas (
 
 -- Animals
 CREATE TABLE IF NOT EXISTS animals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  level_min INTEGER NOT NULL,
-  level_max INTEGER NOT NULL
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name          TEXT NOT NULL,
+  level_min     INTEGER NOT NULL,
+  level_max     INTEGER NOT NULL,
+  image_url     TEXT,
+  difficulty_min INTEGER,
+  difficulty_max INTEGER,
+  trophy_type   TEXT,
+  silver_score  NUMERIC,
+  gold_score    NUMERIC,
+  diamond_score NUMERIC,
+  has_great_one BOOLEAN NOT NULL DEFAULT FALSE,
+  weight_min    NUMERIC,
+  weight_max    NUMERIC,
+  features      TEXT
+);
+
+-- Animal need zones
+CREATE TABLE IF NOT EXISTS animal_need_zones (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id   UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  area_id     UUID NOT NULL REFERENCES hunting_areas(id) ON DELETE CASCADE,
+  time_start  TEXT NOT NULL,
+  time_end    TEXT NOT NULL,
+  behavior    TEXT NOT NULL CHECK (behavior IN ('feeding', 'resting', 'drinking'))
+);
+
+-- Animal fur types
+CREATE TABLE IF NOT EXISTS animal_furs (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id   UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  fur_name    TEXT NOT NULL,
+  probability NUMERIC NOT NULL,
+  rarity      TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'very_rare')),
+  gender      TEXT CHECK (gender IN ('male', 'female'))
 );
 
 -- Area-Animal relationship
