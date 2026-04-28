@@ -85,11 +85,44 @@ export interface HuntingArea {
   description: string | null
 }
 
+export type TrophyType = 'weight' | 'weight_skull' | 'antlers_skull' | 'tusks_skull' | 'composite'
+export type FurRarity = 'common' | 'uncommon' | 'rare' | 'very_rare'
+export type NeedZoneBehavior = 'feeding' | 'resting' | 'drinking'
+
 export interface Animal {
   id: string
   name: string
   level_min: number
   level_max: number
+  image_url: string | null
+  difficulty_min: number | null
+  difficulty_max: number | null
+  trophy_type: TrophyType | null
+  silver_score: number | null
+  gold_score: number | null
+  diamond_score: number | null
+  has_great_one: boolean
+  weight_min: number | null
+  weight_max: number | null
+  features: string | null
+}
+
+export interface AnimalNeedZone {
+  id: string
+  animal_id: string
+  area_id: string
+  time_start: string
+  time_end: string
+  behavior: NeedZoneBehavior
+}
+
+export interface AnimalFur {
+  id: string
+  animal_id: string
+  fur_name: string
+  probability: number
+  rarity: FurRarity
+  gender: 'male' | 'female' | null
 }
 
 export interface AreaAnimal {
