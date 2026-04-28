@@ -79,6 +79,30 @@ export interface ScopeFirearm {
   firearm_id: string
 }
 
+export type BowGrain = 300 | 420 | 600
+
+export interface BowSightDistance {
+  id: string
+  firearm_id: string
+  zero_distance: number
+  grain: BowGrain
+  pin: number        // 1–5 (1=top, 3=middle/zero, 5=bottom)
+  distance: number   // meters
+}
+
+export type BallisticsDirection = 'up' | 'down' | null
+
+export interface FirearmBallistics {
+  id: string
+  firearm_id: string
+  ammo_note: string | null
+  zero_distance: number
+  range_distance: number
+  score: number | null
+  direction: BallisticsDirection
+  is_out: boolean
+}
+
 export interface HuntingArea {
   id: string
   name: string
