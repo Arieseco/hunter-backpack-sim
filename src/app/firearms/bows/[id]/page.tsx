@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { FirearmDetail } from "@/components/firearm-detail"
-import type { Firearm, Ammo } from "@/lib/database.types"
+import type { Firearm, Ammo, Scope, BowSightDistance } from "@/lib/database.types"
 
 export const dynamic = "force-dynamic"
 
@@ -12,10 +12,19 @@ interface PageProps {
 export default async function BowDetailPage({ params }: PageProps) {
   const { id } = await params
 
-  const [{ data: firearmRaw }, { data: ammoLinks }] = await Promise.all([
-    supabase.from("firearms").select("*").eq("id", id).single(),
-    supabase.from("firearm_ammo").select("ammo_id").eq("firearm_id", id),
-  ])
+  const [{ data: firearmRaw }, { data: ammoLinks }, { data: scopeLinks }, { data: bowSightsRaw }] =
+    await Promise.all([
+      supabase.from("firearms").select("*").eq("id", id).single(),
+      supabase.from("firearm_ammo").select("ammo_id").eq("firearm_id", id),
+      supabase.from("scope_firearms").select("scope_id").eq("firearm_id", id),
+      supabase
+        .from("bow_sight_distances")
+        .select("*")
+        .eq("firearm_id", id)
+        .order("zero_distance")
+        .order("grain")
+        .order("pin"),
+    ])
 
   const firearm = firearmRaw as Firearm | null
 
@@ -23,23 +32,25 @@ export default async function BowDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  const links = ammoLinks as { ammo_id: string }[] | null
-  const ammoIds = links?.map((l) => l.ammo_id) ?? []
+  const ammoIds = (ammoLinks as { ammo_id: string }[] | null)?.map((l) => l.ammo_id) ?? []
+  const scopeIds = (scopeLinks as { scope_id: string }[] | null)?.map((l) => l.scope_id) ?? []
 
-  let ammoList: Ammo[] = []
-  if (ammoIds.length > 0) {
-    const { data: ammoRaw } = await supabase
-      .from("ammo")
-      .select("*")
-      .in("id", ammoIds)
-      .order("name")
-    ammoList = (ammoRaw as Ammo[] | null) ?? []
-  }
+  const [ammoList, scopes] = await Promise.all([
+    ammoIds.length > 0
+      ? supabase.from("ammo").select("*").in("id", ammoIds).order("name").then(({ data }) => (data as Ammo[] | null) ?? [])
+      : Promise.resolve([] as Ammo[]),
+    scopeIds.length > 0
+      ? supabase.from("scopes").select("*").in("id", scopeIds).order("name").then(({ data }) => (data as Scope[] | null) ?? [])
+      : Promise.resolve([] as Scope[]),
+  ])
 
   return (
     <FirearmDetail
       firearm={firearm}
       ammoList={ammoList}
+      scopes={scopes}
+      ballistics={[]}
+      bowSightDistances={(bowSightsRaw as BowSightDistance[] | null) ?? []}
       backHref="/firearms/bows"
       backLabel="弓一覧"
     />
