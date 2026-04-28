@@ -1,5 +1,6 @@
+import { Suspense } from "react"
 import { supabase } from "@/lib/supabase"
-import { AnimalTable } from "@/components/animal-table"
+import { AnimalGrid } from "@/components/animal-grid"
 
 export const dynamic = "force-dynamic"
 
@@ -21,11 +22,13 @@ export default async function AnimalsPage() {
       <p className="text-muted-foreground text-sm mb-6">
         登場する全動物の適正クラスと出現する狩猟区を確認できます
       </p>
-      <AnimalTable
-        animals={animals ?? []}
-        areas={areas ?? []}
-        areaAnimals={areaAnimals ?? []}
-      />
+      <Suspense>
+        <AnimalGrid
+          animals={animals ?? []}
+          areas={areas ?? []}
+          areaAnimals={areaAnimals ?? []}
+        />
+      </Suspense>
     </div>
   )
 }
