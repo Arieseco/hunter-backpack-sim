@@ -2,6 +2,8 @@
 
 export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow' | 'muzzleloader'
 
+export type BowType = 'コンパウンドボウ' | 'クロスボウ' | 'リカーブボウ'
+
 export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack' | 'feeder'
 
 export interface Firearm {
@@ -18,6 +20,7 @@ export interface Firearm {
   price: number
   comment: string | null
   image_url: string | null
+  bow_type: BowType | null
 }
 
 export interface Ammo {
@@ -169,6 +172,31 @@ export interface Simulation {
   selected_items: SimulationItem[]
   total_weight: number
   capacity: number
+}
+
+export type TrophyMountSize = '極小' | '小' | '中' | '大' | '特大' | '極大'
+
+export interface MultiTrophy {
+  id: string
+  name: string
+  size: TrophyMountSize
+  cost: number
+}
+
+export interface MultiTrophyRequirement {
+  id: string
+  multi_trophy_id: string
+  animal_id: string
+  gender: 'male' | 'female' | null
+  sort_order: number
+}
+
+export type MultiTrophyWithRequirements = MultiTrophy & {
+  multi_trophy_requirements: Array<{
+    sort_order: number
+    gender: 'male' | 'female' | null
+    animals: { name: string } | null
+  }>
 }
 
 // ラベル定義

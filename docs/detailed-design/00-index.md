@@ -19,3 +19,4 @@
 | 08 | [08-lib.md](08-lib.md) | 共通ライブラリ（weight / supabase / types） |
 | 09 | [09-animals-list.md](09-animals-list.md) | 動物一覧画面 |
 | 10 | [10-animals-detail.md](10-animals-detail.md) | 動物詳細画面 |
+| 11 | [11-firearms-compare.md](11-firearms-compare.md) | 銃器比較画面 ★TODO |

@@ -93,7 +93,9 @@ export function FirearmTable({ firearms, type }: FirearmTableProps) {
                   <TableCell className="font-medium">{firearm.name}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {typeLabel[firearm.type] ?? firearm.type}
+                      {firearm.type === "bow" && firearm.bow_type
+                        ? firearm.bow_type
+                        : typeLabel[firearm.type] ?? firearm.type}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -7,6 +7,8 @@ import {
   Package,
   ArrowRight,
   TreePine,
+  PawPrint,
+  Trophy,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -47,6 +49,22 @@ const sections = [
       { href: "/items/structures", label: "構造物" },
       { href: "/items/feeders", label: "給餌器" },
     ],
+  },
+  {
+    href: "/animals",
+    icon: PawPrint,
+    title: "動物一覧",
+    description:
+      "登場する全動物の適正クラスと出現する狩猟区を確認できます。保護区フィルタや名前検索に対応。",
+    highlight: false,
+  },
+  {
+    href: "/multi-trophies",
+    icon: Trophy,
+    title: "マルチトロフィー",
+    description:
+      "複数のトロフィーを組み合わせて作成できる特別な剥製マウントの一覧。必要トロフィーとコストを確認できます。",
+    highlight: false,
   },
 ]
 

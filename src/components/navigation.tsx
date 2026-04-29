@@ -31,6 +31,7 @@ const navItems = [
     ],
   },
   { href: "/animals", label: "動物一覧" },
+  { href: "/multi-trophies", label: "マルチトロフィー" },
   { href: "/simulator", label: "重量シミュレータ" },
 ]
 
