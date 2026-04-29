@@ -10,6 +10,7 @@ import {
   PawPrint,
   Trophy,
   MapPin,
+  Swords,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -73,6 +74,14 @@ const sections = [
     title: "マルチトロフィー",
     description:
       "複数のトロフィーを組み合わせて作成できる特別な剥製マウントの一覧。必要トロフィーとコストを確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/skills",
+    icon: Swords,
+    title: "スキル一覧",
+    description:
+      "ストーカー・アンブッシャーのスキルツリー一覧。ティア別に各スキルのレベル詳細と効果を確認できます。",
     highlight: false,
   },
 ]
