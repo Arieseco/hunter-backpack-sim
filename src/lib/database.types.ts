@@ -200,6 +200,50 @@ export type MultiTrophyWithRequirements = MultiTrophy & {
   }>
 }
 
+export type PerkCategory = 'ライフル' | 'ハンドガン' | 'ショットガン' | 'アーチェリー'
+export type ActivationType = 'passive' | 'active'
+
+export interface Perk {
+  id: string
+  name: string
+  category: PerkCategory
+  activation_type: ActivationType
+  max_level: number
+  cooldown: number | null
+  comment: string | null
+  sort_order: number
+}
+
+export interface PerkLevel {
+  id: string
+  perk_id: string
+  level: number
+  description: string
+}
+
+export type PerkWithLevels = Perk & { perk_levels: PerkLevel[] }
+
+export interface Skill {
+  id: string
+  name: string
+  category: string
+  tier: number
+  activation_type: ActivationType
+  max_level: number
+  cooldown: number | null
+  comment: string | null
+  sort_order: number
+}
+
+export interface SkillLevel {
+  id: string
+  skill_id: string
+  level: number
+  description: string
+}
+
+export type SkillWithLevels = Skill & { skill_levels: SkillLevel[] }
+
 // ラベル定義
 export const FIREARM_TYPE_LABEL: Record<FirearmType, string> = {
   rifle: 'ライフル',
