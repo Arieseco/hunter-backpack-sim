@@ -1,4 +1,7 @@
--- Fix: seed skills and skill_levels that were missing from migration 022
+-- Fix: add missing tier column and seed skills/skill_levels from migration 022
+
+ALTER TABLE skills
+  ADD COLUMN IF NOT EXISTS tier INTEGER NOT NULL DEFAULT 0 CHECK (tier BETWEEN 0 AND 4);
 
 DELETE FROM skills;
 
