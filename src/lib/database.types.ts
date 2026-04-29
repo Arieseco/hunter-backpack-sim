@@ -27,6 +27,7 @@ export interface Ammo {
   id: string
   name: string
   type: string
+  bow_type: BowType | null
   weight: number
   class_min: number | null
   class_max: number | null

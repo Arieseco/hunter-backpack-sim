@@ -9,6 +9,7 @@ import {
   TreePine,
   PawPrint,
   Trophy,
+  MapPin,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -56,6 +57,14 @@ const sections = [
     title: "動物一覧",
     description:
       "登場する全動物の適正クラスと出現する狩猟区を確認できます。保護区フィルタや名前検索に対応。",
+    highlight: false,
+  },
+  {
+    href: "/areas",
+    icon: MapPin,
+    title: "保護区一覧",
+    description:
+      "世界各地の狩猟保護区を地図から確認。保護区をクリックすると出現動物や詳細情報を確認できます。",
     highlight: false,
   },
   {
