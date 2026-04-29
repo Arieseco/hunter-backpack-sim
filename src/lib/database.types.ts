@@ -2,6 +2,8 @@
 
 export type FirearmType = 'rifle' | 'shotgun' | 'handgun' | 'bow' | 'muzzleloader'
 
+export type BowType = 'コンパウンドボウ' | 'クロスボウ' | 'リカーブボウ'
+
 export type ItemCategory = 'call' | 'scent' | 'equipment' | 'structure' | 'backpack' | 'feeder'
 
 export interface Firearm {
@@ -18,12 +20,14 @@ export interface Firearm {
   price: number
   comment: string | null
   image_url: string | null
+  bow_type: BowType | null
 }
 
 export interface Ammo {
   id: string
   name: string
   type: string
+  bow_type: BowType | null
   weight: number
   class_min: number | null
   class_max: number | null
@@ -170,6 +174,75 @@ export interface Simulation {
   total_weight: number
   capacity: number
 }
+
+export type TrophyMountSize = '極小' | '小' | '中' | '大' | '特大' | '極大'
+
+export interface MultiTrophy {
+  id: string
+  name: string
+  size: TrophyMountSize
+  cost: number
+}
+
+export interface MultiTrophyRequirement {
+  id: string
+  multi_trophy_id: string
+  animal_id: string
+  gender: 'male' | 'female' | null
+  sort_order: number
+}
+
+export type MultiTrophyWithRequirements = MultiTrophy & {
+  multi_trophy_requirements: Array<{
+    sort_order: number
+    gender: 'male' | 'female' | null
+    animals: { name: string } | null
+  }>
+}
+
+export type PerkCategory = 'ライフル' | 'ハンドガン' | 'ショットガン' | 'アーチェリー'
+export type ActivationType = 'passive' | 'active'
+
+export interface Perk {
+  id: string
+  name: string
+  category: PerkCategory
+  activation_type: ActivationType
+  max_level: number
+  cooldown: number | null
+  comment: string | null
+  sort_order: number
+}
+
+export interface PerkLevel {
+  id: string
+  perk_id: string
+  level: number
+  description: string
+}
+
+export type PerkWithLevels = Perk & { perk_levels: PerkLevel[] }
+
+export interface Skill {
+  id: string
+  name: string
+  category: string
+  tier: number
+  activation_type: ActivationType
+  max_level: number
+  cooldown: number | null
+  comment: string | null
+  sort_order: number
+}
+
+export interface SkillLevel {
+  id: string
+  skill_id: string
+  level: number
+  description: string
+}
+
+export type SkillWithLevels = Skill & { skill_levels: SkillLevel[] }
 
 // ラベル定義
 export const FIREARM_TYPE_LABEL: Record<FirearmType, string> = {

@@ -7,6 +7,11 @@ import {
   Package,
   ArrowRight,
   TreePine,
+  PawPrint,
+  Trophy,
+  MapPin,
+  Swords,
+  Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -47,6 +52,46 @@ const sections = [
       { href: "/items/structures", label: "構造物" },
       { href: "/items/feeders", label: "給餌器" },
     ],
+  },
+  {
+    href: "/animals",
+    icon: PawPrint,
+    title: "動物一覧",
+    description:
+      "登場する全動物の適正クラスと出現する狩猟区を確認できます。保護区フィルタや名前検索に対応。",
+    highlight: false,
+  },
+  {
+    href: "/areas",
+    icon: MapPin,
+    title: "保護区一覧",
+    description:
+      "世界各地の狩猟保護区を地図から確認。保護区をクリックすると出現動物や詳細情報を確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/multi-trophies",
+    icon: Trophy,
+    title: "マルチトロフィー",
+    description:
+      "複数のトロフィーを組み合わせて作成できる特別な剥製マウントの一覧。必要トロフィーとコストを確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/skills",
+    icon: Swords,
+    title: "スキル一覧",
+    description:
+      "ストーカー・アンブッシャーのスキルツリー一覧。ティア別に各スキルのレベル詳細と効果を確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/perks",
+    icon: Star,
+    title: "パーク一覧",
+    description:
+      "ライフル・ハンドガン・ショットガン・アーチェリー別のパーク一覧。各パークのレベル詳細と効果を確認できます。",
+    highlight: false,
   },
 ]
 

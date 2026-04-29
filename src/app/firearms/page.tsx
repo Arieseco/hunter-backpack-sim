@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Crosshair, Target, CircleDot, BowArrow } from "lucide-react"
+import { Crosshair, Target, CircleDot, BowArrow, Zap, Telescope } from "lucide-react"
 
 const categories = [
   {
@@ -27,6 +27,18 @@ const categories = [
     href: "/firearms/bows",
     description: "静音性に優れた弓。発見されにくく近距離狩猟に最適。",
     icon: BowArrow,
+  },
+  {
+    label: "弾薬一覧",
+    href: "/firearms/ammo",
+    description: "全銃器種別の弾薬一覧。対応クラス・有効射程・貫通力・拡張性を確認できます。",
+    icon: Zap,
+  },
+  {
+    label: "スコープ一覧",
+    href: "/firearms/scopes",
+    description: "倍率・重量・必要スコア別にスコープを確認できます。",
+    icon: Telescope,
   },
 ]
 

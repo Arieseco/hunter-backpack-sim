@@ -2,11 +2,24 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { getFirearmsWithClass } from "@/lib/firearms"
 import { FirearmTable } from "@/components/firearm-table"
+import type { BowType } from "@/lib/database.types"
 
 export const dynamic = "force-dynamic"
 
+const BOW_TYPE_ORDER: Record<BowType, number> = {
+  コンパウンドボウ: 1,
+  クロスボウ: 2,
+  リカーブボウ: 3,
+}
+
 export default async function BowsPage() {
-  const firearms = await getFirearmsWithClass("bow")
+  const raw = await getFirearmsWithClass("bow")
+  const firearms = [...raw].sort((a, b) => {
+    const ao = BOW_TYPE_ORDER[a.bow_type as BowType] ?? 99
+    const bo = BOW_TYPE_ORDER[b.bow_type as BowType] ?? 99
+    if (ao !== bo) return ao - bo
+    return a.name.localeCompare(b.name, "ja")
+  })
 
   return (
     <div className="container mx-auto px-4 py-8">

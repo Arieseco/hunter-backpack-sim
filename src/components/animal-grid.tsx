@@ -6,7 +6,6 @@ import Image from "next/image"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -23,10 +22,23 @@ interface AnimalGridProps {
   areaAnimals: AreaAnimal[]
 }
 
-function classLabel(animal: Animal): string {
-  return animal.level_min === animal.level_max
-    ? `Class ${animal.level_min}`
-    : `Class ${animal.level_min}–${animal.level_max}`
+function ClassDivider({ level }: { level: number }) {
+  return (
+    <div className="flex items-center gap-3 mt-6 mb-3">
+      <div className="flex-1 h-px bg-border" />
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-sm font-semibold text-foreground">クラス {level}</span>
+        <Image
+          src={`/icons/class-${level}.png`}
+          alt={`クラス${level}`}
+          width={28}
+          height={28}
+          className="opacity-80"
+        />
+      </div>
+      <div className="flex-1 h-px bg-border" />
+    </div>
+  )
 }
 
 function AnimalCard({ animal, returnParams }: { animal: Animal; returnParams: string }) {
@@ -53,9 +65,6 @@ function AnimalCard({ animal, returnParams }: { animal: Animal; returnParams: st
           )}
         </div>
         <p className="text-xs font-medium text-foreground leading-tight">{animal.name}</p>
-        <Badge variant="outline" className="text-xs whitespace-nowrap">
-          {classLabel(animal)}
-        </Badge>
       </div>
     </Link>
   )
@@ -98,8 +107,21 @@ export function AnimalGrid({ animals, areas, areaAnimals }: AnimalGridProps) {
     })
   }, [animals, animalIdsInArea, search])
 
+  const grouped = useMemo(() => {
+    const map = new Map<number, Animal[]>()
+    for (const animal of filtered) {
+      const level = animal.level_min
+      const group = map.get(level) ?? []
+      group.push(animal)
+      map.set(level, group)
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a - b)
+  }, [filtered])
+
+  const returnParams = searchParams.toString()
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-1">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -130,14 +152,19 @@ export function AnimalGrid({ animals, areas, areaAnimals }: AnimalGridProps) {
           該当する動物が見つかりません
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          {filtered.map((animal) => (
-            <AnimalCard key={animal.id} animal={animal} returnParams={searchParams.toString()} />
-          ))}
-        </div>
+        grouped.map(([level, group]) => (
+          <div key={level}>
+            <ClassDivider level={level} />
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+              {group.map((animal) => (
+                <AnimalCard key={animal.id} animal={animal} returnParams={returnParams} />
+              ))}
+            </div>
+          </div>
+        ))
       )}
 
-      <p className="text-sm text-muted-foreground">{filtered.length} 種</p>
+      <p className="text-sm text-muted-foreground mt-4">{filtered.length} 種</p>
     </div>
   )
 }
