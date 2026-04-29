@@ -17,6 +17,8 @@ const navItems = [
       { href: "/firearms/shotguns", label: "ショットガン" },
       { href: "/firearms/handguns", label: "ハンドガン" },
       { href: "/firearms/bows", label: "弓" },
+      { href: "/firearms/ammo", label: "弾薬一覧" },
+      { href: "/firearms/scopes", label: "スコープ一覧" },
     ],
   },
   {
@@ -31,6 +33,7 @@ const navItems = [
     ],
   },
   { href: "/animals", label: "動物一覧" },
+  { href: "/areas", label: "保護区" },
   { href: "/multi-trophies", label: "マルチトロフィー" },
   { href: "/simulator", label: "重量シミュレータ" },
 ]
