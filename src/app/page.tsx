@@ -11,6 +11,7 @@ import {
   Trophy,
   MapPin,
   Swords,
+  Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -82,6 +83,14 @@ const sections = [
     title: "スキル一覧",
     description:
       "ストーカー・アンブッシャーのスキルツリー一覧。ティア別に各スキルのレベル詳細と効果を確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/perks",
+    icon: Star,
+    title: "パーク一覧",
+    description:
+      "ライフル・ハンドガン・ショットガン・アーチェリー別のパーク一覧。各パークのレベル詳細と効果を確認できます。",
     highlight: false,
   },
 ]
