@@ -19,6 +19,7 @@ const navItems = [
       { href: "/firearms/bows", label: "弓" },
       { href: "/firearms/ammo", label: "弾薬一覧" },
       { href: "/firearms/scopes", label: "スコープ一覧" },
+      { href: "/compare", label: "銃器比較" },
     ],
   },
   {
