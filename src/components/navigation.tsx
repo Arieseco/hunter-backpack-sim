@@ -36,7 +36,6 @@ const navItems = [
   { href: "/animals", label: "動物一覧" },
   { href: "/areas", label: "保護区" },
   { href: "/multi-trophies", label: "マルチトロフィー" },
-  { href: "/compare", label: "銃器比較" },
   { href: "/skills", label: "スキル一覧" },
   { href: "/perks", label: "パーク一覧" },
   { href: "/dogs", label: "狩猟犬" },
