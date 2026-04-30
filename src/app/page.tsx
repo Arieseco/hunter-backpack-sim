@@ -6,12 +6,14 @@ import {
   Target,
   Package,
   ArrowRight,
+  ArrowLeftRight,
   TreePine,
   PawPrint,
   Trophy,
   MapPin,
   Swords,
   Star,
+  Dog,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -37,6 +39,14 @@ const sections = [
       { href: "/firearms/handguns", label: "ハンドガン" },
       { href: "/firearms/bows", label: "弓" },
     ],
+  },
+  {
+    href: "/compare",
+    icon: ArrowLeftRight,
+    title: "銃器比較",
+    description:
+      "銃器をドラッグ＆ドロップしてスペックと弾道性能を並べて比較。最適な一丁を選ぼう。",
+    highlight: false,
   },
   {
     href: "/items",
@@ -91,6 +101,14 @@ const sections = [
     title: "パーク一覧",
     description:
       "ライフル・ハンドガン・ショットガン・アーチェリー別のパーク一覧。各パークのレベル詳細と効果を確認できます。",
+    highlight: false,
+  },
+  {
+    href: "/dogs",
+    icon: Dog,
+    title: "狩猟犬",
+    description:
+      "ブラッドハウンド・ラブラドール・レトリバー・ジャーマン・ショートヘアード・ポインターの能力と特性一覧（DLC）。",
     highlight: false,
   },
 ]
