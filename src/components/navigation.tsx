@@ -148,7 +148,7 @@ export function Navigation() {
                         onMouseEnter={() => handleMouseEnter(item.href)}
                         onMouseLeave={handleMouseLeave}
                       >
-                        <div className="bg-popover border border-border rounded-md shadow-lg py-1 min-w-[140px]">
+                        <div className="bg-popover border border-border rounded-md shadow-lg py-1 min-w-[140px] whitespace-nowrap">
                           {item.children.map((child) => {
                             const childActive = pathname === child.href
                             return (
