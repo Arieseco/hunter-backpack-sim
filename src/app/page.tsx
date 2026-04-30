@@ -27,6 +27,14 @@ const sections = [
     highlight: true,
   },
   {
+    href: "/compare",
+    icon: ArrowLeftRight,
+    title: "銃器比較シミュレータ",
+    description:
+      "銃器をドラッグ＆ドロップしてスペックと弾道性能を並べて比較。最適な一丁を選ぼう。",
+    highlight: false,
+  },
+  {
     href: "/firearms",
     icon: Target,
     title: "銃器一覧",
@@ -39,14 +47,6 @@ const sections = [
       { href: "/firearms/handguns", label: "ハンドガン" },
       { href: "/firearms/bows", label: "弓" },
     ],
-  },
-  {
-    href: "/compare",
-    icon: ArrowLeftRight,
-    title: "銃器比較",
-    description:
-      "銃器をドラッグ＆ドロップしてスペックと弾道性能を並べて比較。最適な一丁を選ぼう。",
-    highlight: false,
   },
   {
     href: "/items",
