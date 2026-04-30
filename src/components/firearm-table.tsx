@@ -13,15 +13,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, ChevronRight, Weight, Target } from "lucide-react"
+import { Search, ChevronRight, Weight } from "lucide-react"
 import type { Firearm } from "@/lib/database.types"
 import type { AmmoClassRange } from "@/lib/firearms"
+import { cn } from "@/lib/utils"
 
 const typeLabel: Record<string, string> = {
   rifle: "ライフル",
   shotgun: "ショットガン",
   handgun: "ハンドガン",
   bow: "弓",
+  muzzleloader: "マズルローダー",
 }
 
 interface FirearmWithAmmo extends Firearm {
@@ -48,21 +50,59 @@ function ClassBadge({ classes }: { classes: AmmoClassRange[] }) {
 
 export function FirearmTable({ firearms, type }: FirearmTableProps) {
   const [search, setSearch] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
 
-  const filtered = firearms.filter((f) =>
-    f.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const presentTypes = [...new Set(firearms.map((f) => f.type))]
+  const showTypeFilter = presentTypes.length > 1
+
+  const filtered = firearms.filter((f) => {
+    const matchesSearch = f.name.toLowerCase().includes(search.toLowerCase())
+    const matchesType = typeFilter === "all" || f.type === typeFilter
+    return matchesSearch && matchesType
+  })
 
   return (
     <div className="space-y-4">
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="銃器名で検索..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="銃器名で検索..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {showTypeFilter && (
+          <div className="flex gap-1 rounded-lg border border-border p-1 bg-muted/30 w-fit">
+            <button
+              onClick={() => setTypeFilter("all")}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                typeFilter === "all"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              全て
+            </button>
+            {presentTypes.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  typeFilter === t
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {typeLabel[t] ?? t}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* PC表示: テーブル */}

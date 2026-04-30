@@ -11,11 +11,20 @@ export interface FirearmWithClass extends Firearm {
 }
 
 export async function getFirearmsWithClass(type: FirearmType): Promise<FirearmWithClass[]> {
+  return getFirearmsWithTypes([type])
+}
+
+export async function getFirearmsWithTypes(types: FirearmType[]): Promise<FirearmWithClass[]> {
   const { data: firearms } = await supabase
     .from("firearms")
     .select("*")
-    .eq("type", type)
+    .in("type", types)
     .order("name")
+
+  const firearmList = (firearms as Firearm[] | null) ?? []
+  const ids = firearmList.map((f) => f.id)
+
+  if (ids.length === 0) return []
 
   const { data: ammoData } = await supabase
     .from("firearm_ammo")
@@ -26,6 +35,7 @@ export async function getFirearmsWithClass(type: FirearmType): Promise<FirearmWi
         class_max
       )
     `)
+    .in("firearm_id", ids)
 
   const classesMap = new Map<string, AmmoClassRange[]>()
 
@@ -45,7 +55,7 @@ export async function getFirearmsWithClass(type: FirearmType): Promise<FirearmWi
     }
   }
 
-  return ((firearms as Firearm[] | null) ?? []).map((f) => {
+  return firearmList.map((f) => {
     const classes = classesMap.get(f.id) ?? []
     classes.sort((a, b) => a.min - b.min)
     return { ...f, ammo_classes: classes }
