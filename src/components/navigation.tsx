@@ -37,6 +37,7 @@ const navItems = [
   { href: "/multi-trophies", label: "マルチトロフィー" },
   { href: "/skills", label: "スキル一覧" },
   { href: "/perks", label: "パーク一覧" },
+  { href: "/dogs", label: "狩猟犬" },
   { href: "/simulator", label: "重量シミュレータ" },
 ]
 

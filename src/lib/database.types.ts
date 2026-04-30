@@ -261,3 +261,33 @@ export const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {
   backpack: 'バックパック',
   feeder: '給餌器',
 }
+
+export interface HuntingDog {
+  id: string
+  name: string
+  description: string | null
+  notes: string | null
+  sort_order: number
+}
+
+export interface DogAbility {
+  id: string
+  dog_id: string
+  name: string
+  description: string | null
+  sort_order: number
+}
+
+export interface DogTrait {
+  id: string
+  dog_id: string
+  level: 5 | 10 | 15 | 20 | 25 | 30
+  slot: 1 | 2
+  name: string
+  description: string | null
+}
+
+export type HuntingDogWithDetails = HuntingDog & {
+  dog_abilities: DogAbility[]
+  dog_traits: DogTrait[]
+}
