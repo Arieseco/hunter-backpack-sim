@@ -5,9 +5,9 @@ import { Crosshair, Target, CircleDot, BowArrow, Zap, Telescope } from "lucide-r
 
 const categories = [
   {
-    label: "ライフル",
+    label: "ライフル / マズルローダー",
     href: "/firearms/rifles",
-    description: "ボルトアクション・レバーアクション等。長距離・大型獣に対応。",
+    description: "ボルトアクション・レバーアクション・マズルローダー等。長距離・大型獣に対応。",
     icon: Crosshair,
   },
   {
