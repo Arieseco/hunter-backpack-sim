@@ -19,7 +19,6 @@ const navItems = [
       { href: "/firearms/bows", label: "弓" },
       { href: "/firearms/ammo", label: "弾薬一覧" },
       { href: "/firearms/scopes", label: "スコープ一覧" },
-      { href: "/compare", label: "銃器比較" },
     ],
   },
   {
@@ -36,10 +35,23 @@ const navItems = [
   { href: "/animals", label: "動物一覧" },
   { href: "/areas", label: "保護区" },
   { href: "/multi-trophies", label: "マルチトロフィー" },
-  { href: "/skills", label: "スキル一覧" },
-  { href: "/perks", label: "パーク一覧" },
+  {
+    label: "スキル・パーク",
+    href: "/skills",
+    children: [
+      { href: "/skills", label: "スキル一覧" },
+      { href: "/perks", label: "パーク一覧" },
+    ],
+  },
   { href: "/dogs", label: "狩猟犬" },
-  { href: "/simulator", label: "重量シミュレータ" },
+  {
+    label: "シミュレータ",
+    href: "/simulator",
+    children: [
+      { href: "/simulator", label: "重量シミュレータ" },
+      { href: "/compare", label: "銃器比較" },
+    ],
+  },
 ]
 
 export function Navigation() {
