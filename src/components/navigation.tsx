@@ -35,10 +35,23 @@ const navItems = [
   { href: "/animals", label: "動物一覧" },
   { href: "/areas", label: "保護区" },
   { href: "/multi-trophies", label: "マルチトロフィー" },
-  { href: "/skills", label: "スキル一覧" },
-  { href: "/perks", label: "パーク一覧" },
+  {
+    label: "スキル・パーク",
+    href: "/skills",
+    children: [
+      { href: "/skills", label: "スキル一覧" },
+      { href: "/perks", label: "パーク一覧" },
+    ],
+  },
   { href: "/dogs", label: "狩猟犬" },
-  { href: "/simulator", label: "重量シミュレータ" },
+  {
+    label: "シミュレータ",
+    href: "/simulator",
+    children: [
+      { href: "/simulator", label: "重量シミュレータ" },
+      { href: "/compare", label: "銃器比較" },
+    ],
+  },
 ]
 
 export function Navigation() {
@@ -135,7 +148,7 @@ export function Navigation() {
                         onMouseEnter={() => handleMouseEnter(item.href)}
                         onMouseLeave={handleMouseLeave}
                       >
-                        <div className="bg-popover border border-border rounded-md shadow-lg py-1 min-w-[140px]">
+                        <div className="bg-popover border border-border rounded-md shadow-lg py-1 min-w-[140px] whitespace-nowrap">
                           {item.children.map((child) => {
                             const childActive = pathname === child.href
                             return (
